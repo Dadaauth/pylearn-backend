@@ -1,5 +1,3 @@
-import os
-
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import create_access_token

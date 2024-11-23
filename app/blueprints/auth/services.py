@@ -23,8 +23,6 @@ def user_login(credentials):
     user = None
     if credentials.get("role") == "student":
         user = Student.search(email=credentials.get("email"))
-    elif credentials.get("role") == "instructor":
-        user = Instructor.search(email=credentials.get("email"))
     elif credentials.get("role") == "admin":
         user = Admin.search(email=credentials.get("email"))
 
@@ -41,18 +39,13 @@ def create_user(data: dict, role: str = "student") -> dict:
     data contains:
         - first_name, last_name, email, password (all required)
     """
+    user = None
     if role == "student":
         user = Student(**data)
     elif role == "admin":
         if data.get("admin_reg_code") != os.getenv("ADMIN_REGISTRATION_PASSCODE"):
             raise UnAuthenticated("Invalid admin registration passcode")
         user = Admin(**data)
-    elif role == "instructor":
-        if not current_user:
-            raise UnAuthenticated("Please authenticate as admin")
-        if current_user.role != "admin":
-            raise UnAuthenticated("Only admins can create instructor accounts")
-        user = Instructor(**data)
     else:
         raise InternalServerError
     user.add()
@@ -70,24 +63,21 @@ def check_credentials(credentials: dict) -> None:
     if credentials.get("email") == "" or credentials.get("password") == "":
         raise BadRequest("Required credentials missing")
     if not credentials.get("role") or credentials.get("role") \
-        not in ["student", "instructor", "admin"]:
+        not in ["student", "admin"]:
         raise BadRequest("Invalid role")
     
-def verify_password(student, password: str) -> bool:
-    """Verifies if the provided password matches the student's password."""
-    return student.check_password(password)
+def verify_password(user, password: str) -> bool:
+    """Verifies if the provided password matches the user's password."""
+    return user.check_password(password)
 
 def user_exists(email: str, role: str ="student") -> bool:
     """Checks if a user with the given email exists in the database."""
     try:
+        user = None
         if role == "student":
             user = Student.search(email=email)
         elif role == "admin":
             user = Admin.search(email=email)
-        elif role == "instructor":
-            user  = Instructor.search(email=email)
-        else:
-            user = None
         return user is not None
     except Exception as e:
         print(e)

@@ -25,7 +25,7 @@ def login():
 @handle_endpoint_exceptions
 def register():
     """
-    Registers a new student using the provided JSON data.
+    Registers a new user using the provided JSON data.
 
     This function attempts to create a new student record based on the JSON data
     received in the request. If successful, it returns a JSON response with a
@@ -38,6 +38,9 @@ def register():
     """
     data = request.json
     role = data.get("role")
+
+    if role not in ["student", "admin"]:
+        raise ValueError("user role not specified")
 
     if role == "admin":
         if user_exists(data.get("email"), "admin"):

@@ -19,7 +19,11 @@ def login():
     """
     data = request.json
     token = user_login(data)
-    return format_json_responses(data=token, message="User logged in successfully!")
+    data = {
+        "role": data.get("role"),
+        **token
+    }
+    return format_json_responses(data=data, message="User logged in successfully!")
 
 @jwt_required(optional=True)
 @handle_endpoint_exceptions

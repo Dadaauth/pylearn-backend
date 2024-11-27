@@ -3,13 +3,23 @@ from flask_jwt_extended import create_access_token, create_refresh_token, curren
 
 from app.models.project import Project
 from app.utils.helpers import retrieve_model_info, extract_request_data
-from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated
+from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
 
 
 def create_new_project():
     data = extract_request_data("json")
     new_project = Project(**data)
     new_project.insert_node_end()
+
+def fetch_project_details_single():
+    args = extract_request_data("args")
+    filter = args.get('q')
+    p_id = args.get("id")
+    project = Project.search(id=p_id)
+    if not project:
+        raise NotFound(f"Project with id {p_id} not found!")
+    return {"project": retrieve_model_info(project, filter.split(","))}
+
 
 def fetch_project_details():
     filter = extract_request_data("args").get('q')
@@ -28,11 +38,6 @@ def sort_projects(projects):
     # Retrieve the head of the linked list
     project_head = get_project_head(projects)
     if project_head is None: return []
-    print("\n\n\n")
-    print("------------------")
-    print("Head => ", project_head)
-    print("------------------")
-    print("\n\n\n")
     p_list.append(project_head)
 
     # Add the projects to a dictionary

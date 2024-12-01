@@ -5,6 +5,13 @@ from app.models.project import Project
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
 
+def update_single_project_details(id):
+    data = extract_request_data("json")
+    project = Project.search(id=id)
+    if project is None or isinstance(project, list):
+        raise BadRequest("Project not found or multiple projects found")
+    project.update(**data)
+    project.save()
 
 def create_new_project():
     data = extract_request_data("json")

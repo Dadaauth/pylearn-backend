@@ -74,6 +74,8 @@ class Project(BaseModel, Base):
             self.save()
             project.next_project_id = self.id
             project.save()
+        else:
+            self.save()
 
 
 class StudentProject(BaseModel, Base):

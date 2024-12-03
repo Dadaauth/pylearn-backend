@@ -2,9 +2,16 @@ import os
 from flask_jwt_extended import create_access_token, create_refresh_token, current_user
 
 from app.models.user import Student, Admin
-from app.utils.helpers import retrieve_model_info
+from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated
 
+def check_specific_user_role():
+    data = extract_request_data("json")
+    user_id = data.get("user_id")
+    if Student.search(id=user_id) is not None:
+        return {"role": "student"}
+    if Admin.search(id=user_id) is not None:
+        return {"role": "admin"}
 
 def user_login(credentials):
     """
@@ -32,7 +39,10 @@ def user_login(credentials):
         raise BadRequest("Invalid credentials")
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
     refresh_token = create_refresh_token(identity={"id": user.id, "role": credentials.get("role")})
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    basic_details = retrieve_model_info(user, ["id", "first_name", "last_name", "email", "role"])
+    basic_details["user_id"] = basic_details.get("id")
+    del basic_details["id"]
+    return {"access_token": access_token, "refresh_token": refresh_token, **basic_details}
 
 def create_user(data: dict, role: str = "student") -> dict:
     """Creates a new student record in the database

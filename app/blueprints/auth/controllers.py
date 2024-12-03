@@ -2,8 +2,12 @@ from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import create_access_token
 
-from app.blueprints.auth.services import create_user, user_login, user_exists
+from app.blueprints.auth.services import create_user, user_login, user_exists, check_specific_user_role
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions
+
+def check_user_role():
+    data = check_specific_user_role()
+    return format_json_responses(data=data, message="Record retrieved successfully")
 
 @handle_endpoint_exceptions
 def login():
@@ -18,12 +22,8 @@ def login():
         Response: A JSON response containing the authentication token and a success message.
     """
     data = request.json
-    token = user_login(data)
-    data = {
-        "role": data.get("role"),
-        **token
-    }
-    return format_json_responses(data=data, message="User logged in successfully!")
+    dt = user_login(data)
+    return format_json_responses(data=dt, message="User logged in successfully!")
 
 @jwt_required(optional=True)
 @handle_endpoint_exceptions

@@ -5,6 +5,26 @@ from app.models.project import Project, StudentProject
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
 
+def _retrieve_projects_status():
+    data = extract_request_data("json")
+    projects_ids = data.get("projects")
+    student_id = data.get("student_id")
+    statuses = []
+    for p_id in projects_ids:
+        student_project = StudentProject.search(student_id=student_id, project_id=p_id)
+
+        if student_project and not isinstance(student_project, list):
+            statuses.append({
+                "id": p_id,
+                "status": student_project.status,
+            })
+        else:
+            statuses.append({
+                "id": p_id,
+                "status": "unreleased",
+            })
+    return {"statuses": statuses}
+
 def mark_a_project_as_done():
     data = extract_request_data("json")
     student_id = data.get("student_id")

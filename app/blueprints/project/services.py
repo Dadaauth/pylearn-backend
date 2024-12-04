@@ -24,8 +24,9 @@ def mark_a_project_as_done():
             raise BadRequest(f"Project does not exist or there are multiple entries for project with id {project_id}")
 
     if project.next_project:
-        new_student_project = StudentProject(student_id=student_id, project_id=project.next_project_id, status="pending")
-        new_student_project.save()
+        if not StudentProject.search(student_id=student_id, project_id=project.next_project_id):
+            new_student_project = StudentProject(student_id=student_id, project_id=project.next_project_id, status="pending")
+            new_student_project.save()
 
 def update_single_project_details(id):
     data = extract_request_data("json")

@@ -1,9 +1,31 @@
 import os
 from flask_jwt_extended import create_access_token, create_refresh_token, current_user
 
-from app.models.project import Project
+from app.models.project import Project, StudentProject
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
+
+def mark_a_project_as_done():
+    data = extract_request_data("json")
+    student_id = data.get("student_id")
+    project_id = data.get("project_id")
+
+    project = Project.search(id=project_id)
+
+    student_project = StudentProject.search(project_id=project_id, student_id=student_id)
+    if student_project is not None and not isinstance(student_project, list):
+        student_project.status = "completed"
+        student_project.save()
+    else:
+        if project and not isinstance(project, list):
+            student_project = StudentProject(student_id=student_id, project_id=project_id, status="completed")
+            student_project.save()
+        else:
+            raise BadRequest(f"Project does not exist or there are multiple entries for project with id {project_id}")
+
+    if project.next_project:
+        new_student_project = StudentProject(student_id=student_id, project_id=project.next_project_id, status="pending")
+        new_student_project.save()
 
 def update_single_project_details(id):
     data = extract_request_data("json")
@@ -26,6 +48,7 @@ def fetch_project_details_single():
     if not project:
         raise NotFound(f"Project with id {p_id} not found!")
     return {"project": retrieve_model_info(project, filter.split(","))}
+    # Add search for the staus of the project if the student has completed it.
 
 
 def fetch_project_details():

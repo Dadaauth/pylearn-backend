@@ -11,11 +11,18 @@ from app.utils.helpers import has_required_keys
 class Project(BaseModel, Base):
     __tablename__ = "projects"
 
-    title = mapped_column(String(300), nullable=False)
-    description = mapped_column(String(300), nullable=False)
-    content = mapped_column(LONGTEXT, nullable=False)
+    title = mapped_column(String(100), nullable=False)
+    description = mapped_column(String(300))
+    markdown_content = mapped_column(LONGTEXT)
+
+    module_id = mapped_column(ForeignKey("modules.id"), nullable=False)
+    author_id = mapped_column(ForeignKey("admins.id"), nullable=False)
+
     next_project_id = mapped_column(ForeignKey("projects.id"), nullable=True)
     prev_project_id = mapped_column(ForeignKey("projects.id"), nullable=True)
+
+    module = relationship("Module", back_populates="projects")
+    author = relationship("Admin")
 
     next_project = relationship("Project", remote_side="Project.id", foreign_keys=[next_project_id])
     prev_project = relationship("Project", remote_side="Project.id", foreign_keys=[prev_project_id])
@@ -30,7 +37,25 @@ class Project(BaseModel, Base):
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
-        
+
+    @classmethod
+    def all():
+        """
+        You need to intercept here because you need
+            to sort the projects before you send them
+            to the client calling the models API
+        """
+        return super().all()
+
+    @classmethod
+    def search(**filters: dict) -> list:
+        """
+        You need to intercept here because you need
+            to sort the projects before you send them
+            to the client calling the models API
+        """
+        return super().search(filters)
+
     def remap_node_to_index(self, index):
         """
         Method used for remapping projects order in the linked list.
@@ -83,7 +108,7 @@ class StudentProject(BaseModel, Base):
 
     student_id = mapped_column(ForeignKey("students.id"), nullable=False)
     project_id = mapped_column(ForeignKey("projects.id"), nullable=False)
-    status = mapped_column(ENUM("pending", "completed"), default="pending")
+    status = mapped_column(ENUM("pending", "completed"), default="pending", nullable=False)
 
     def __init__(self, **kwargs):
         """

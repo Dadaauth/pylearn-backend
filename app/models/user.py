@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum
+from sqlalchemy import Integer, String, Enum, null
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from flask_bcrypt import generate_password_hash, check_password_hash
@@ -21,12 +21,12 @@ class User(BaseModel):
             __init__(**kwargs): Initializes a User instance with the provided keyword arguments. Raises a ValueError if any required keys are missing.
             basic_info() -> dict: Returns a dictionary containing basic information about the user, including id, first_name, last_name, and email.
     """
-    first_name = mapped_column(String(300), nullable=False)
-    last_name = mapped_column(String(300), nullable=False)
-    email = mapped_column(String(300), nullable=False)
-    password = mapped_column(MEDIUMTEXT, nullable=False)
-    role = mapped_column(Enum('admin', 'student',\
-                              name='role', default='student'), default='student', nullable=False)
+    first_name = mapped_column(String(60), nullable=False)
+    last_name = mapped_column(String(60), nullable=False)
+    password = mapped_column(String(300), nullable=False)
+    email = mapped_column(String(255), nullable=False, unique=True)
+    username = mapped_column(String(60), nullable=False, unique=True)
+    phone = mapped_column(String(45))
 
     def __init__(self, **kwargs):
         """
@@ -41,7 +41,7 @@ class User(BaseModel):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'first_name', 'last_name', 'email', 'password'}
+        required_keys = {'first_name', 'last_name', 'email', 'password', "username"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required keys: {', '.join(missing)}")
@@ -110,6 +110,7 @@ class Student(User, Base):
         __init__(**kwargs): Initializes a new instance of the Student class.
     """
     __tablename__ = "students"
+    points = mapped_column(Integer, nullable=False, default=0)
 
     def __init__(self, **kwargs):
         """
@@ -119,3 +120,8 @@ class Student(User, Base):
         **kwargs: Arbitrary keyword arguments passed to the superclass initializer.
         """
         super().__init__(**kwargs)
+
+        required_keys = {"points"}
+        accurate, missing = has_required_keys(kwargs, required_keys)
+        if not accurate:
+            raise ValueError(f"Missing required key(s): {', '.join(missing)}")

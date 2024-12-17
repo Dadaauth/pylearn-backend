@@ -20,7 +20,7 @@ class BaseModel:
             save: persist the object details in the database
     """
     
-    id = mapped_column(String(60), default=str(uuid4()),  primary_key=True, nullable=False)
+    id = mapped_column(String(60), default=str(uuid4()),  primary_key=True, nullable=False, unique=True)
     created_at = mapped_column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = mapped_column(DateTime, default=datetime.now(timezone.utc), nullable=False)
 

@@ -1,0 +1,4 @@
+runtime: python312
+entrypoint: gunicorn --access-logfile - -b :$PORT 'app:create_app(environment="production")'
+env_variables:
+  PORT: 5000

@@ -6,8 +6,8 @@ from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated
 
 def check_specific_user_role():
-    data = extract_request_data("json")
-    user_id = data.get("user_id")
+    data = extract_request_data("args")
+    user_id = data.get("id")
     if Student.search(id=user_id) is not None:
         return {"role": "student"}
     if Admin.search(id=user_id) is not None:

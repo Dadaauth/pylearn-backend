@@ -6,14 +6,16 @@ from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
-def create_app(testing=False):
+def create_app(environment="development"):
     app = Flask(__name__)
     CORS(app)
-    load_dotenv()
-    os.environ["TESTING"] = str(testing)
+
+    if environment == "production":
+        load_dotenv(".env.production")
+    else:
+        load_dotenv()
 
     app.config.update(
-        TESTING=testing,
         SECRET_KEY=os.getenv("SECRET_KEY"),
         JWT_ACCESS_TOKEN_EXPIRES=timedelta(days=7)
     )

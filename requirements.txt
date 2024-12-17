@@ -6,8 +6,10 @@ colorama==0.4.6
 cryptography==43.0.3
 Flask==3.0.3
 Flask-Bcrypt==1.0.1
+Flask-Cors==5.0.0
 Flask-JWT-Extended==4.6.0
 greenlet==3.1.1
+gunicorn==23.0.0
 iniconfig==2.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.4

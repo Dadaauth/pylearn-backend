@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import DateTime, Integer, String, ForeignKey, Text
 from sqlalchemy.dialects.mysql import LONGTEXT, ENUM
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -108,7 +108,13 @@ class StudentProject(BaseModel, Base):
 
     student_id = mapped_column(ForeignKey("students.id"), nullable=False)
     project_id = mapped_column(ForeignKey("projects.id"), nullable=False)
-    status = mapped_column(ENUM("pending", "completed"), default="pending", nullable=False)
+    status = mapped_column(ENUM("released", "submitted", "graded", "verified"), default="released", nullable=False)
+    submission_file = mapped_column(String(300))
+    submitted_on = mapped_column(DateTime)
+    graded_on = mapped_column(DateTime)
+    graded_by = mapped_column(ForeignKey("admins.id"))
+    grade = mapped_column(Integer)
+    feedback = mapped_column(Text)
 
     def __init__(self, **kwargs):
         """

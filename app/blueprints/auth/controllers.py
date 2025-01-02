@@ -1,13 +1,44 @@
 from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity, unset_jwt_cookies
+from flask_jwt_extended import get_current_user, jwt_required, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import create_access_token
 
 from app.blueprints.auth.services import create_user, user_login, user_exists, check_specific_user_role
-from app.utils.helpers import format_json_responses, handle_endpoint_exceptions
+from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, retrieve_model_info
 
+@jwt_required()
 def check_user_role():
-    data = check_specific_user_role()
-    return format_json_responses(data=data, message="Record retrieved successfully")
+    identity = get_jwt_identity()
+    return format_json_responses(data={"role": identity["role"]}, message="Record retrieved successfully")
+
+@jwt_required()
+def get_user_details():
+    """
+    Fetches basic details of the currently logged-in user.
+
+    This function requires a valid JWT token to be present in the request.
+    If the token is valid, it retrieves the user's identity and returns
+    a JSON response with the user's details.
+
+    Returns:
+        Response: A JSON response containing the user's details.
+    """
+    current_user = get_current_user()
+    return format_json_responses(data=current_user.basic_info(), message="User details retrieved successfully")
+
+@jwt_required()
+def is_logged_in():
+    """
+    Checks if the user is currently logged in by verifying the JWT token.
+
+    This function requires a valid JWT token to be present in the request.
+    If the token is valid, it returns a JSON response indicating that the user
+    is logged in.
+
+    Returns:
+        Response: A JSON response indicating the login status of the user.
+    """
+    current_user = get_jwt_identity()
+    return format_json_responses(data={"user": current_user}, message="User is logged in")
 
 @handle_endpoint_exceptions
 def login():

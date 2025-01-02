@@ -29,9 +29,9 @@ def user_login(credentials):
     check_credentials(credentials)
     user = None
     if credentials.get("role") == "student":
-        user = Student.search(email=credentials.get("email"))
+        user = Student.search(username=credentials.get("username"))
     elif credentials.get("role") == "admin":
-        user = Admin.search(email=credentials.get("email"))
+        user = Admin.search(username=credentials.get("username"))
 
     if user is None or isinstance(user, list):
         raise BadRequest("Invalid credentials")
@@ -39,7 +39,8 @@ def user_login(credentials):
         raise BadRequest("Invalid credentials")
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
     refresh_token = create_refresh_token(identity={"id": user.id, "role": credentials.get("role")})
-    basic_details = retrieve_model_info(user, ["id", "first_name", "last_name", "email", "role"])
+    basic_details = retrieve_model_info(user, ["id", "first_name", "last_name", "email", "username"])
+    basic_details["role"] = credentials.get("role")
     basic_details["user_id"] = basic_details.get("id")
     del basic_details["id"]
     return {"access_token": access_token, "refresh_token": refresh_token, **basic_details}
@@ -68,9 +69,9 @@ def create_user(data: dict, role: str = "student") -> dict:
 
 def check_credentials(credentials: dict) -> None:
     """Checks if the required credentials are present in the request data."""
-    if not credentials.get("email") or not credentials.get("password"):
+    if not credentials.get("username") or not credentials.get("password"):
         raise BadRequest("Required credentials missing")
-    if credentials.get("email") == "" or credentials.get("password") == "":
+    if credentials.get("username") == "" or credentials.get("password") == "":
         raise BadRequest("Required credentials missing")
     if not credentials.get("role") or credentials.get("role") \
         not in ["student", "admin"]:

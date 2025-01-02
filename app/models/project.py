@@ -11,9 +11,10 @@ from app.utils.helpers import has_required_keys
 class Project(BaseModel, Base):
     __tablename__ = "projects"
 
-    title = mapped_column(String(100), nullable=False)
+    title = mapped_column(String(300), nullable=False)
     description = mapped_column(String(300))
     markdown_content = mapped_column(LONGTEXT)
+    status = mapped_column(ENUM("deleted", "draft", "published"))
 
     module_id = mapped_column(ForeignKey("modules.id"), nullable=False)
     author_id = mapped_column(ForeignKey("admins.id"), nullable=False)

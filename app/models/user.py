@@ -78,6 +78,7 @@ class User(BaseModel):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
+            "username": self.username
         }
         return info
 
@@ -111,6 +112,7 @@ class Student(User, Base):
     """
     __tablename__ = "students"
     points = mapped_column(Integer, nullable=False, default=0)
+    registration_number = mapped_column(String(45), nullable=False)
 
     def __init__(self, **kwargs):
         """

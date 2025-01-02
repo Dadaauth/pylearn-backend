@@ -10,6 +10,12 @@ from app.models.base import Base
 # before calling Base.metadata.create_all()
 from app.models.user import Admin, Student
 from app.models.project import Project, StudentProject
+from app.models.module import Module
+from app.models.leaderboard import LeaderBoard
+from app.models.notification import Notification
+from app.models.point import Point
+from app.models.streak import Streak
+
 
 DB_CONNECTION_STRING = os.environ.get("DB_CONNECTION_STRING")
 TEST_DB_CONNECTION_STRING = os.environ.get("TEST_DB_CONNECTION_STRING")

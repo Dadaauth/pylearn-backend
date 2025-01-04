@@ -35,8 +35,11 @@ def user_login(credentials):
 
     if user is None or isinstance(user, list):
         raise BadRequest("Invalid credentials")
+    if user.status != "active":
+        raise BadRequest("Account not yet activated")
     if not verify_password(user, credentials.get("password")):
         raise BadRequest("Invalid credentials")
+
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
     refresh_token = create_refresh_token(identity={"id": user.id, "role": credentials.get("role")})
     basic_details = retrieve_model_info(user, ["id", "first_name", "last_name", "email", "username"])

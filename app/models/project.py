@@ -7,6 +7,7 @@ from sqlalchemy.orm import mapped_column, relationship
 from app.models.base import Base
 from app.models.basemodel import BaseModel
 from app.utils.helpers import has_required_keys
+from app.utils.error_extensions import NotFound
 
 class Project(BaseModel, Base):
     __tablename__ = "projects"
@@ -14,7 +15,7 @@ class Project(BaseModel, Base):
     title = mapped_column(String(300), nullable=False)
     description = mapped_column(String(300))
     markdown_content = mapped_column(LONGTEXT)
-    status = mapped_column(ENUM("deleted", "draft", "published"))
+    status = mapped_column(ENUM("deleted", "draft", "published"), default="draft", nullable=False)
 
     module_id = mapped_column(ForeignKey("modules.id"), nullable=False)
     author_id = mapped_column(ForeignKey("admins.id"), nullable=False)
@@ -34,10 +35,43 @@ class Project(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'title', 'description', 'content'}
+        required_keys = {'title', 'author_id', 'module_id', 'status'}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
+        
+        # insert Project at the correct node
+        if Project.count() == 0:
+            # insert as head of the list
+            self.prev_project_id = None
+            self.next_project_id = None
+            return
+        
+        self.save()
+        self.refresh()
+
+        prev_project_id = kwargs.get("prev_project_id")
+        if not prev_project_id:
+            # Make first project in list
+            head_project = Project.search(prev_project_id=None)
+            head_project.prev_project_id = self.id
+            head_project.save() # Add project to session for saving
+
+            self.next_project_id = head_project.id
+        else:
+            prev_project = Project.search(id=prev_project_id)
+            if prev_project is None:
+                raise NotFound("Previous Project Not Found")
+            next_p_id = prev_project.next_project_id
+            prev_project.next_project_id = self.id
+            prev_project.save()
+            self.next_project_id = next_p_id
+
+            # Check if the next project exists
+            next_project = Project.search(id=next_p_id)
+            if next_project:
+                next_project.prev_project_id = self.id
+                next_project.save()
 
     @classmethod
     def all():
@@ -49,59 +83,13 @@ class Project(BaseModel, Base):
         return super().all()
 
     @classmethod
-    def search(**filters: dict) -> list:
+    def search(cls, **filters: dict) -> list:
         """
         You need to intercept here because you need
             to sort the projects before you send them
             to the client calling the models API
         """
-        return super().search(filters)
-
-    def remap_node_to_index(self, index):
-        """
-        Method used for remapping projects order in the linked list.
-        Should be used for remapping only and not for assigning a
-        new project not yet in the list
-
-        arguments:
-            index: a Project instance that comes before the new `self` position
-                    Value is None if remapping to `head` (beginning of the list)
-        """
-
-        # Rearrange relationship among surrounding projects in previous project position
-        if self.prev_project_id is not None:
-            self.prev_project.next_project_id = self.next_project_id
-        if self.next_project_id is not None:
-            self.next_project.prev_project_id = self.id
-
-        # If remapping project to `head` (beginning of list)
-        if index is None:
-            head_project = Project.search(prev_project_id=None)
-            head_project.prev_project_id = self.id
-            self.prev_project_id = None
-            self.next_project_id = head_project.id
-
-        # Assign new location to project
-        self.prev_project_id = index.id
-        self.next_project_id = index.next_project_id
-        if index.next_project_id is not None:
-            index.next_project.prev_project_id = self.id
-        index.next_project_id = self.id
-
-    def insert_node_end(self):
-        """
-        Used for assigning a new project not yet added to
-        the linked list (to the end of the list).
-        """
-        # get the last node
-        project = Project.search(next_project_id=None)
-        if project is not None and isinstance(project, Project):
-            self.prev_project_id = project.id
-            self.save()
-            project.next_project_id = self.id
-            project.save()
-        else:
-            self.save()
+        return super().search(**filters)
 
 
 class StudentProject(BaseModel, Base):

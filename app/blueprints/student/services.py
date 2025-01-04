@@ -1,5 +1,3 @@
-
-
 from flask_jwt_extended import get_jwt_identity
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
@@ -12,6 +10,10 @@ def ifetch_modules_for_student():
     student_id = get_jwt_identity()["id"]
     mds = Module.all()
     modules = [mod.to_dict() for mod in mds]
+
+    # Release first project if student does not have any project released
+    if StudentProject.search(student_id=student_id) is None:
+        release_first_project(student_id)
     
     for module in modules:
         projects = jfetch_projects(module.get("id"))

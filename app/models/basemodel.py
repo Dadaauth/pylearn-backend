@@ -67,6 +67,10 @@ class BaseModel:
         return models.storage.all(cls)
     
     @classmethod
+    def count(cls):
+        return models.storage.count(cls)
+    
+    @classmethod
     def search(cls, **filters: dict) -> list:
         return models.storage.search(cls, **filters)
     

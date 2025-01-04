@@ -61,6 +61,9 @@ class DBStorage:
     def all(self, cls):
         return [obj for obj in self.__session.scalars(select(cls)).all()]
     
+    def count(self, cls):
+        return self.__session.query(cls).count()
+    
     def search(self, cls, **filters):
         try:
             sh =  [obj for obj in self.__session.scalars(select(cls).filter_by(**filters))]

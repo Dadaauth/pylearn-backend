@@ -27,6 +27,7 @@ class User(BaseModel):
     email = mapped_column(String(255), nullable=False, unique=True)
     username = mapped_column(String(60), nullable=False, unique=True)
     phone = mapped_column(String(45))
+    status = mapped_column(Enum("active", "inactive", "suspended", "deleted"), default="active", nullable=False)
 
     def __init__(self, **kwargs):
         """
@@ -112,7 +113,7 @@ class Student(User, Base):
     """
     __tablename__ = "students"
     points = mapped_column(Integer, nullable=False, default=0)
-    registration_number = mapped_column(String(45), nullable=False)
+    registration_number = mapped_column(String(100), nullable=False)
 
     def __init__(self, **kwargs):
         """
@@ -123,7 +124,7 @@ class Student(User, Base):
         """
         super().__init__(**kwargs)
 
-        required_keys = {"points"}
+        required_keys = {"registration_number"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

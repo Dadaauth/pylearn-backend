@@ -1,3 +1,4 @@
+from ast import mod
 import os
 from flask_jwt_extended import create_access_token, create_refresh_token, current_user, get_jwt_identity
 
@@ -5,6 +6,19 @@ from app.models.module import Module
 from app.models.project import Project, StudentProject
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
+
+def iupdate_module(module_id):
+    data = extract_request_data("json")
+    to_update =  {
+        "title": data.get("title"),
+        "description": data.get("description"),
+        "status": data.get("status")
+    }
+    module = Module.search(id=module_id)
+    if not module:
+        raise NotFound(f"Module with ID {module_id} not found")
+    module.update(**to_update)
+    module.save()
 
 def ifetch_modules():
     mds = Module.all()
@@ -46,9 +60,26 @@ def create_new_project():
     
     Project(**data).save()
 
+def fetch_project_details_single(project_id):
+    project = Project.search(id=project_id)
+    if not project:
+        raise NotFound(f"Project with ID {project_id} not found")
+    
+    return project.to_dict()
 
+def update_single_project_details(project_id):
+    data = extract_request_data("json")
+    project = Project.search(id=project_id)
+    if project is None or isinstance(project, list):
+        raise BadRequest("Project not found or multiple projects found")
+    
+    status = "draft"
+    if data.get("mode") == "publish": status = "published"
+    data["status"] = status
+    data["author_id"] = get_jwt_identity()["id"]
 
-
+    project.update(**data)
+    project.save()
 
 
 
@@ -105,24 +136,6 @@ def mark_a_project_as_done():
         if not StudentProject.search(student_id=student_id, project_id=project.next_project_id):
             new_student_project = StudentProject(student_id=student_id, project_id=project.next_project_id, status="pending")
             new_student_project.save()
-
-def update_single_project_details(id):
-    data = extract_request_data("json")
-    project = Project.search(id=id)
-    if project is None or isinstance(project, list):
-        raise BadRequest("Project not found or multiple projects found")
-    project.update(**data)
-    project.save()
-
-def fetch_project_details_single():
-    args = extract_request_data("args")
-    filter = args.get('q')
-    p_id = args.get("id")
-    project = Project.search(id=p_id)
-    if not project:
-        raise NotFound(f"Project with id {p_id} not found!")
-    return {"project": retrieve_model_info(project, filter.split(","))}
-    # Add search for the staus of the project if the student has completed it.
 
 def sort_projects(projects):
     temp_1 = {}

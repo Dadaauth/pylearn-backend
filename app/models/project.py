@@ -89,7 +89,32 @@ class Project(BaseModel, Base):
             to sort the projects before you send them
             to the client calling the models API
         """
-        return super().search(**filters)
+        projects = super().search(**filters)
+        return cls.sort_projects(projects)
+    
+    def sort_projects(projects):
+        if projects is None or projects == []: return projects
+        if not isinstance(projects, list): return projects
+
+        # Retrieve the head of the list
+        head = None
+        for project in projects:
+            if project.prev_project_id is None:
+                head = project
+                break
+        
+        # sorting process
+        tmp = head
+        tmp_list = [head]
+        while tmp is not None and tmp.next_project_id is not None:
+            for project in projects:
+                if project.id == tmp.next_project_id:
+                    tmp_list.append(project)
+                    tmp = project
+                    break
+
+        projects = tmp_list
+        return projects
 
 
 class StudentProject(BaseModel, Base):

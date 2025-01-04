@@ -31,7 +31,7 @@ class DBStorage:
     def __init__(self) -> None:
         self.testing = True if os.getenv("TESTING") == "True" else False
         self.__engine = create_engine(TEST_DB_CONNECTION_STRING if
-                                      self.testing else DB_CONNECTION_STRING, echo=True)
+                                      self.testing else DB_CONNECTION_STRING, echo=True, pool_pre_ping=True)
         self.reload()
 
     def drop_tables(self):

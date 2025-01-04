@@ -53,24 +53,45 @@ class DBStorage:
         self.__session = Session()
 
     def new(self, obj):
-        self.__session.add(obj)
+        try:
+            self.__session.add(obj)
+        except Exception as e:
+            print("Exception Occured When working with DataBase", e)
+            self.__session.rollback()
+            return False
 
     def delete(self, obj):
-        self.__session.delete(obj)
+        try:
+            self.__session.delete(obj)
+        except Exception as e:
+            print("Exception Occured When working with DataBase", e)
+            self.__session.rollback()
+            return False
 
     def all(self, cls):
-        return [obj for obj in self.__session.scalars(select(cls)).all()]
+        try:
+            return [obj for obj in self.__session.scalars(select(cls)).all()]
+        except Exception as e:
+            print("Exception Occured When working with DataBase", e)
+            self.__session.rollback()
+            return []
     
     def count(self, cls):
-        return self.__session.query(cls).count()
+        try:
+            return self.__session.query(cls).count()
+        except Exception as e:
+            print("Exception Occured When working with DataBase", e)
+            self.__session.rollback()
+            return False
     
     def search(self, cls, **filters):
         try:
             sh =  [obj for obj in self.__session.scalars(select(cls).filter_by(**filters))]
             return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
         except Exception as e:
-            print(e)
-            return None
+            print("Exception Occured When working with DataBase", e)
+            self.__session.rollback()
+            return False
 
     def save(self) -> None:
         try:

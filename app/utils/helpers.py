@@ -11,7 +11,7 @@ Functions:
 from functools import wraps
 
 from flask import jsonify, request
-from flask_jwt_extended import current_user
+from flask_jwt_extended import current_user, get_jwt_identity
 
 from .error_extensions import BadRequest, NotFound, UnAuthenticated
 
@@ -102,30 +102,9 @@ def admin_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user = current_user
-        if not user or user.role != 'admin':
+        identity = get_jwt_identity()
+        if not identity or identity["role"] != 'admin':
             return format_json_responses(403, message="Forbidden: Admin access required")
-        return f(*args, **kwargs)
-    return decorated_function
-
-def instructor_required(f):
-    """
-    A decorator to check if the logged-in user has an instructor role.
-
-    This decorator wraps around a function and checks if the user has an instructor role.
-    If the user does not have an instructor role, it returns a 403 Forbidden response.
-
-    Args:
-        f (function): The endpoint function to be decorated.
-
-    Returns:
-        function: The decorated function with instructor role check.
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        user = current_user
-        if not user or user.role != 'instructor':
-            return format_json_responses(403, message="Forbidden: Instructor access required")
         return f(*args, **kwargs)
     return decorated_function
 

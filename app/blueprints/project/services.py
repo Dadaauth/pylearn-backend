@@ -1,9 +1,67 @@
 import os
-from flask_jwt_extended import create_access_token, create_refresh_token, current_user
+from flask_jwt_extended import create_access_token, create_refresh_token, current_user, get_jwt_identity
 
+from app.models.module import Module
 from app.models.project import Project, StudentProject
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
+
+def ifetch_modules():
+    mds = Module.all()
+    return [mod.to_dict() for mod in mds]
+
+def icreate_module():
+    data = extract_request_data("json")
+    if not data.get("title"):
+        raise BadRequest("Required field(s) not present: title")
+
+    Module(**data).save()
+
+def fetch_projects():
+    module_id = extract_request_data("args").get('module_id')
+
+    if module_id:
+        projects = Project.search(module_id=module_id)
+    else:
+        projects = Project.all()
+
+    p_list = []
+
+    if projects:
+        if isinstance(projects, list):
+            for project in projects:
+                p_list.append(project.to_dict())
+        else:
+            p_list = [projects.to_dict()]
+    return p_list
+
+def create_new_project():
+    data = extract_request_data("json")
+
+    # fetch status, module_id, author_id, and prev_project_id
+    status = "draft"
+    if data.get("mode") == "publish": status = "published"
+    data["author_id"] = get_jwt_identity()["id"]
+    data["status"] = status
+    
+    Project(**data).save()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def _retrieve_projects_status():
     data = extract_request_data("json")
@@ -56,11 +114,6 @@ def update_single_project_details(id):
     project.update(**data)
     project.save()
 
-def create_new_project():
-    data = extract_request_data("json")
-    new_project = Project(**data)
-    new_project.insert_node_end()
-
 def fetch_project_details_single():
     args = extract_request_data("args")
     filter = args.get('q')
@@ -70,17 +123,6 @@ def fetch_project_details_single():
         raise NotFound(f"Project with id {p_id} not found!")
     return {"project": retrieve_model_info(project, filter.split(","))}
     # Add search for the staus of the project if the student has completed it.
-
-
-def fetch_project_details():
-    filter = extract_request_data("args").get('q')
-    projects = Project.all()
-    p_list = []
-    projects = sort_projects(projects)
-
-    for project in projects:
-        p_list.append(retrieve_model_info(project, filter.split(",")))
-    return p_list
 
 def sort_projects(projects):
     temp_1 = {}

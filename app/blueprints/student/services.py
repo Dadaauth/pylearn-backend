@@ -74,11 +74,27 @@ def activate_student_account():
     if not (data.get("username") and data.get("password") and data.get("phone")):
         raise BadRequest("Missing required field(s): username, password, phone")
 
+    if student.status == "active":
+        raise BadRequest("Account Activated Already!!")
+
     student.update(**{
         "username": data["username"],
         "password": data["password"],
         "phone": data["phone"],
         "status": "active"
     })
+    student_id = student.id
     student.save()
+    return student_id
     
+
+def release_first_project(student_id):
+    project = Project.search(prev_project_id=None)
+    if not project:
+        return
+    
+    StudentProject(
+        student_id=student_id,
+        project_id=project.id,
+        status="released"
+    ).save()

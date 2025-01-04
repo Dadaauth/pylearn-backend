@@ -74,13 +74,14 @@ class Project(BaseModel, Base):
                 next_project.save()
 
     @classmethod
-    def all():
+    def all(cls):
         """
         You need to intercept here because you need
             to sort the projects before you send them
             to the client calling the models API
         """
-        return super().all()
+        projects = super().all()
+        return cls.sort_projects(projects)
 
     @classmethod
     def search(cls, **filters: dict) -> list:

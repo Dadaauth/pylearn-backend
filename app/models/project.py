@@ -98,25 +98,26 @@ class Project(BaseModel, Base):
         """
             You need to intercept here to account for
             updates involving the arrangement of nodes
-            in the linked list
+            in the linked list of projects and the updating of modules
 
             Update a set of attributes in an object.
             :params
                 @kwargs: a dictionary of attributes
                         to update
         """
-        if self.prev_project_id != kwargs.get("prev_project_id"):
+        # update to module or/and project ordering
+        if self.prev_project_id != kwargs.get("prev_project_id") or self.module_id != kwargs.get("module_id"):
             """
                 Code for if the client is trying
                 to update the order of the projects
                 in the linked list.
             """
-            next_project = self.next_project
-            prev_project = self.prev_project
-            prev_project_id = kwargs.get("prev_project_id")
-            new_prev_project = Project.search(id=prev_project_id)
-            head_project = Project.search(prev_project_id=None)
+            next_project = Project.search(id=self.next_project_id)
+            prev_project = Project.search(id=self.prev_project_id)
+            new_prev_project = Project.search(id=kwargs.get("prev_project_id"))
+            head_project = Project.search(prev_project_id=None, module_id=kwargs.get("module_id"))
 
+            # Detach connection from previous spot
             if next_project:
                 next_project.prev_project_id = self.prev_project_id
             if prev_project:
@@ -125,6 +126,7 @@ class Project(BaseModel, Base):
             self.prev_project_id = None
             self.next_project_id = None
 
+            # Add project to new spot in the list
             if new_prev_project:
                 self.prev_project_id = new_prev_project.id
                 self.next_project_id = new_prev_project.next_project_id
@@ -133,13 +135,10 @@ class Project(BaseModel, Base):
                     new_prev_project.next_project.prev_project_id = self.id
 
                 new_prev_project.next_project_id = self.id
-            else:
-                self.prev_project_id = None
+            elif new_prev_project is None and head_project:
                 self.next_project_id = head_project.id
                 head_project.prev_project_id = self.id
 
-        if kwargs.get("prev_project_id"):
-            del kwargs["prev_project_id"]
         super().update(**kwargs)
 
     def sort_projects(projects):

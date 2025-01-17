@@ -1,9 +1,9 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 from app.blueprints.project.services import create_new_project, fetch_projects, fetch_project_details_single
 from app.blueprints.project.services import update_single_project_details, mark_a_project_as_done, _retrieve_projects_status
 from .services import icreate_module, ifetch_modules, iupdate_module
-from app.utils.helpers import extract_request_data, format_json_responses, handle_endpoint_exceptions, admin_required
+from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required
 
 @jwt_required()
 @admin_required

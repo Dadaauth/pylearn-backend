@@ -5,8 +5,8 @@ import copy
 
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import mapped_column
+from flask import g
 
-import app.models as models
 
 class BaseModel:
     """
@@ -44,35 +44,35 @@ class BaseModel:
             :method
                 delete: deletes or removes an object from the session and saves.
         """
-        models.storage.delete(self)
-        return models.storage.save()
+        g.db_storage.delete(self)
+        return g.db_storage.save()
 
     def add(self) -> None:
         """
             :method
                 add: j
         """
-        models.storage.new(self)
+        g.db_storage.new(self)
 
     def save(self) -> None:
         self.updated_at = datetime.now(timezone.utc)
-        models.storage.new(self)
-        return models.storage.save()
+        g.db_storage.new(self)
+        return g.db_storage.save()
 
     def refresh(self):
-        models.storage.refresh(self)
+        g.db_storage.refresh(self)
 
     @classmethod
     def all(cls):
-        return models.storage.all(cls)
+        return g.db_storage.all(cls)
     
     @classmethod
     def count(cls):
-        return models.storage.count(cls)
+        return g.db_storage.count(cls)
     
     @classmethod
     def search(cls, **filters: dict) -> list:
-        return models.storage.search(cls, **filters)
+        return g.db_storage.search(cls, **filters)
     
     def to_dict(self, strip: Optional[List[str]] = None) -> dict:
         dict_repr = copy.deepcopy(self.__dict__)

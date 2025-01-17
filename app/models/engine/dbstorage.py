@@ -27,12 +27,15 @@ class DBStorage:
     
     __engine = None
     __session = None
+    __Session = None
 
     def __init__(self) -> None:
         self.testing = True if os.getenv("TESTING") == "True" else False
         self.__engine = create_engine(TEST_DB_CONNECTION_STRING if
-                                      self.testing else DB_CONNECTION_STRING, echo=True, pool_pre_ping=True)
-        self.reload()
+                                      self.testing else DB_CONNECTION_STRING, pool_recycle=3600, pool_pre_ping=True)
+        Base.metadata.create_all(self.__engine)
+        session = sessionmaker(bind=self.__engine)
+        self.__Session = scoped_session(session)
 
     def drop_tables(self):
         """
@@ -41,23 +44,29 @@ class DBStorage:
             !!!!!!!!!
         """
         if self.testing:
-            self.__session.close()
+            if self.__session.is_active:
+                self.__session.close()
             Base.metadata.drop_all(self.__engine)
         else:
             raise Exception("SafeGuard: Do not try to drop tables randomly in production!!!!")
 
-    def reload(self) -> None:
-        Base.metadata.create_all(self.__engine)
-        session = sessionmaker(bind=self.__engine)
-        Session = scoped_session(session)
-        self.__session = Session()
+    def load(self) -> None:
+        self.__session = self.__Session()
+
+    def close(self) -> None:
+        """
+            Closes the session object and removes Session from scoped_session::
+                The connection to the database is hereby closed
+        """
+        self.__Session.remove()
 
     def new(self, obj):
         try:
             self.__session.add(obj)
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            self.__session.rollback()
+            if self.__session.is_active:
+                self.__session.rollback()
             return False
 
     def delete(self, obj):
@@ -65,7 +74,8 @@ class DBStorage:
             self.__session.delete(obj)
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            self.__session.rollback()
+            if self.__session.is_active:
+                self.__session.rollback()
             return False
 
     def all(self, cls):
@@ -73,7 +83,8 @@ class DBStorage:
             return [obj for obj in self.__session.scalars(select(cls)).all()]
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            self.__session.rollback()
+            if self.__session.is_active:
+                self.__session.rollback()
             return []
     
     def count(self, cls):
@@ -81,17 +92,13 @@ class DBStorage:
             return self.__session.query(cls).count()
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            self.__session.rollback()
+            if self.__session.is_active:
+                self.__session.rollback()
             return False
     
     def search(self, cls, **filters):
-        try:
-            sh =  [obj for obj in self.__session.scalars(select(cls).filter_by(**filters))]
-            return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
-        except Exception as e:
-            print("Exception Occured When working with DataBase", e)
-            self.__session.rollback()
-            return False
+        sh =  [obj for obj in self.__session.scalars(select(cls).filter_by(**filters))]
+        return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
 
     def save(self) -> None:
         try:
@@ -99,14 +106,9 @@ class DBStorage:
             return True
         except Exception as e:
             print("Exception Occured When Saving To DataBase", e)
-            self.__session.rollback()
+            if self.__session.is_active:
+                self.__session.rollback()
             return False
 
     def refresh(self, obj) -> None:
         self.__session.refresh(obj)
-
-    def close(self) -> None:
-        """Closes the Session object:: The
-        connection to the database is hereby closed"""
-        self.__session.close()
-

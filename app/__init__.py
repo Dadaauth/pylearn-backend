@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 
-from flask import Flask
+from flask import Flask, g
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -23,6 +23,7 @@ def create_app(environment="development"):
 
     from app.blueprints import register_blueprints
     from app.models.user import Admin, Student
+    from app.models import storage
     
     @jwt.user_lookup_loader
     def user_loader_callback(_jwt_header, jwt_data):
@@ -32,6 +33,19 @@ def create_app(environment="development"):
         elif identity['role'] == 'student':
             return Student.search(id=identity['id'])
         return None
+    
+    @app.before_request
+    def create_session():
+        # Load a new Session object
+        storage.load()
+        g.db_storage = storage
+
+    @app.teardown_request
+    def remove_session(exception=None):
+        if hasattr(g, 'db_storage'):
+            # Close the session and remove
+            # Session from scoped_session
+            g.db_storage.close()
 
     register_blueprints(app)
     return app

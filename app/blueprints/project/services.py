@@ -1,6 +1,4 @@
-from ast import mod
-import os
-from flask_jwt_extended import create_access_token, create_refresh_token, current_user, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 
 from app.models.module import Module
 from app.models.project import Project, StudentProject

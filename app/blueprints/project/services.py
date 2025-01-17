@@ -2,8 +2,8 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.models.module import Module
 from app.models.project import Project, StudentProject
-from app.utils.helpers import retrieve_model_info, extract_request_data
-from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated, NotFound
+from app.utils.helpers import extract_request_data
+from app.utils.error_extensions import BadRequest, NotFound
 
 def iupdate_module(module_id):
     data = extract_request_data("json")

@@ -105,35 +105,41 @@ class Project(BaseModel, Base):
                 @kwargs: a dictionary of attributes
                         to update
         """
-        if kwargs.get("prev_project_id") is not None:
+        if self.prev_project_id != kwargs.get("prev_project_id"):
             """
                 Code for if the client is trying
                 to update the order of the projects
                 in the linked list.
             """
+            next_project = self.next_project
+            prev_project = self.prev_project
             prev_project_id = kwargs.get("prev_project_id")
             new_prev_project = Project.search(id=prev_project_id)
+            head_project = Project.search(prev_project_id=None)
 
-            if not new_prev_project:
-                raise NotFound("Previous Project not found")
+            if next_project:
+                next_project.prev_project_id = self.prev_project_id
+            if prev_project:
+                prev_project.next_project_id = self.next_project_id
 
-            if self.prev_project_id == new_prev_project.id:
-                del kwargs["prev_project_id"]
-                super().update(**kwargs)
-                return
+            self.prev_project_id = None
+            self.next_project_id = None
 
-            new_prev_project.prev_project_id = self.prev_project_id
-            self.next_project_id = new_prev_project.next_project_id
+            if new_prev_project:
+                self.prev_project_id = new_prev_project.id
+                self.next_project_id = new_prev_project.next_project_id
 
-            if new_prev_project.next_project_id:
-                new_prev_project.next_project.prev_project_id = self.id
-                # add to SQLAlchemy session
-                new_prev_project.next_project.add()
-            self.prev_project_id = new_prev_project.id
-            new_prev_project.next_project_id = self.id
-            # add to SQLAlchemy session
-            new_prev_project.add()
+                if new_prev_project.next_project:
+                    new_prev_project.next_project.prev_project_id = self.id
 
+                new_prev_project.next_project_id = self.id
+            else:
+                self.prev_project_id = None
+                self.next_project_id = head_project.id
+                head_project.prev_project_id = self.id
+
+        if kwargs.get("prev_project_id"):
+            del kwargs["prev_project_id"]
         super().update(**kwargs)
 
     def sort_projects(projects):

@@ -1,4 +1,3 @@
-from hmac import new
 from uuid import uuid4
 
 from sqlalchemy import DateTime, Integer, String, ForeignKey, Text, UniqueConstraint

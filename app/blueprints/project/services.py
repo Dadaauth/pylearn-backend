@@ -20,6 +20,8 @@ def iupdate_module(module_id):
 
 def ifetch_modules():
     mds = Module.all()
+    if not mds:
+        raise NotFound("No Module Found")
     return [mod.to_dict() for mod in mds]
 
 def icreate_module():

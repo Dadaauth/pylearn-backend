@@ -39,12 +39,14 @@ def fetch_projects():
 
     p_list = []
 
-    if projects:
-        if isinstance(projects, list):
-            for project in projects:
-                p_list.append(project.to_dict())
-        else:
-            p_list = [projects.to_dict()]
+    if not projects or projects is None:
+        raise NotFound("No projects found")
+
+    if isinstance(projects, list):
+        for project in projects:
+            p_list.append(project.to_dict())
+    elif isinstance(projects, Project):
+        p_list = [projects.to_dict()]
     return p_list
 
 def create_new_project():

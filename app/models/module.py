@@ -98,24 +98,38 @@ class Module(BaseModel, Base):
                 @kwargs: a dictionary of attributes
                         to update
         """
-        if kwargs.get("prev_module_id") is not None:
+        if self.prev_module_id != kwargs.get("prev_module_id"):
             """
                 Code for if the client is trying
                 to update the order of the modules
                 in the linked list.
             """
-            prev_module_id = kwargs.get("prev_module_id")
-            new_prev_module = Module.search(id=prev_module_id)
-            if not new_prev_module:
-                raise NotFound("Previous Module not found")
-            
-            new_prev_module.prev_module_id = self.prev_module_id
-            self.next_module_id = new_prev_module.next_module_id
+            next_module = Module.search(id=self.next_module_id)
+            prev_module = Module.search(id=self.prev_module_id)
+            new_prev_module = Module.search(id=kwargs.get("prev_module_id"))
+            head_module = Module.search(prev_module_id=None)
 
-            if new_prev_module.next_module_id:
-                new_prev_module.next_module.prev_module_id = self.id
-            self.prev_module_id = new_prev_module.id
-            new_prev_module.next_module_id = self.id
+            # Detach connection from previous spot
+            if next_module:
+                next_module.prev_module_id = self.prev_module_id
+            if prev_module:
+                prev_module.next_module_id = self.next_module_id
+
+            self.prev_module_id = None
+            self.next_module_id = None
+
+            # Add module to new spot in the list
+            if new_prev_module:
+                self.prev_module_id = new_prev_module.id
+                self.next_module_id = new_prev_module.next_module_id
+
+                if new_prev_module.next_module:
+                    new_prev_module.next_module.prev_module_id = self.id
+
+                new_prev_module.next_module_id = self.id
+            elif new_prev_module is None and head_module:
+                self.next_module_id = head_module.id
+                head_module.prev_module_id = self.id
 
         super().update(**kwargs)
 

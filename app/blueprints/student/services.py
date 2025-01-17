@@ -1,10 +1,88 @@
+from datetime import datetime, timezone
 from flask_jwt_extended import get_jwt_identity
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
-from app.models.user import Student
+from app.models.user import Student, Admin
 from app.models.module import Module
 from app.models.project import Project, StudentProject
 
+
+def irelease_next_project(project_id: str):
+    student_id = get_jwt_identity()["id"]
+    project = Project.search(id=project_id)
+    if project is None:
+        raise NotFound(f"Project with id {project_id} not found")
+    
+    if project.next_project_id:
+        # Release the next project in the module
+        StudentProject(
+            student_id=student_id,
+            project_id=project.next_project_id,
+            status="released"
+        ).save()
+    else:
+        # next_project_id is None therefore release the first project in the next module
+        module =  Module.search(id=project.module_id)
+        if not module: return
+        next_module = module.next_module
+
+        head_project = Project.search(module_id=next_module.id, prev_project_id=None)
+        if not head_project: return
+        StudentProject(
+            student_id=student_id,
+            project_id=head_project.id,
+            status="released"
+        ).save()
+
+def isubmit_student_project(project_id):
+    data = extract_request_data("json")
+    submission_file = data.get("submission_file")
+    student_id = get_jwt_identity()["id"]
+    studentProject = StudentProject.search(project_id=project_id, student_id=student_id)
+    if not studentProject:
+        raise NotFound("Project not found!")
+    studentProject.submission_file = submission_file
+    studentProject.submitted_on = datetime.now(timezone.utc)
+    studentProject.status = "submitted"
+    studentProject.save()
+
+def ifetch_current_projects():
+    student_id = get_jwt_identity()["id"]
+    studentProjects = StudentProject.search(status="released", student_id=student_id)
+    projects = []
+    if isinstance(studentProjects, list):
+        for student_project in studentProjects:
+            project = Project.search(id=student_project.project_id)
+            if project:
+                projects.append(project.to_dict())
+    elif isinstance(studentProjects, StudentProject):
+        project = Project.search(id=studentProjects.project_id)
+        if project:
+            projects.append(project.to_dict())
+    return projects
+
+def ifetch_project_for_student(project_id):
+    student_id = get_jwt_identity()["id"]
+    project = Project.search(id=project_id)
+    if not project:
+        raise NotFound(f"Project with ID {project_id} not found")
+    
+    studentProject = StudentProject.search(project_id=project_id, student_id=student_id)
+    if not studentProject:
+        raise NotFound("Project does not exist for this student")
+    author = Admin.search(id=project.author_id)
+    module = Module.search(id=project.module_id)
+    if not author:
+        author = "NIL"
+    else:
+        author = f"{author.first_name} {author.last_name}"
+    
+    project = project.to_dict()
+    project["author"] = author
+    project["module"] = module.title
+    project["status"] = studentProject.status
+
+    return project
 
 def ifetch_modules_for_student():
     student_id = get_jwt_identity()["id"]
@@ -91,10 +169,14 @@ def activate_student_account():
     
 
 def release_first_project(student_id):
-    project = Project.search(prev_project_id=None)
+    head_module = Module.search(prev_module_id=None)
+    if not head_module:
+        return
+
+    project = Project.search(prev_project_id=None, module_id=head_module.id)
     if not project:
         return
-    
+
     StudentProject(
         student_id=student_id,
         project_id=project.id,

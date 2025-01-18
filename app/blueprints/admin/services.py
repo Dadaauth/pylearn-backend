@@ -6,6 +6,7 @@ from app.utils.helpers import extract_request_data, retrieve_model_info
 from app.utils.error_extensions import BadRequest, NotFound
 from app.models.user import Student
 from app.models.project import StudentProject, Project
+from app.utils.email_utils import send_email
 
 def igrade_student_project():
     data = extract_request_data("json")
@@ -115,3 +116,30 @@ def admin_create_new_student():
         "registration_number": registration_number
     }
     Student(**student_details).save()
+    subject = "Welcome to AuthHub! Activate Your Account Now"
+    email_body = f"""
+    <html>
+    <body>
+        <p>Dear {data.get("first_name")},</p>
+        <p>Welcome to Authority Innovations Hub! We are excited to have you onboard as you begin this journey with us</p>
+        <p>Your account has been successfully created by an administrator. To get started, you’ll need to activate your account using the details provided below:</p>
+        <p><b>Your Registration Details</b></p>
+        <ul>
+            <li>Registration Number: {registration_number}</li>
+        </ul>
+        <p><b>Account Activation</b></p>
+        <p>Please click the link below to activate your account:</p>
+        <p><a href="http://localhost:3000/auth/account/activate?reg_no={registration_number}">Activate My Account</a>
+        </p>
+        <p>Once activated, you’ll have full access to your dashboard and all the resources available on our platform.</p>
+        <p>If you encounter any issues during the activation process or have any questions, feel free to contact our support team at [support@authhub.tech].</p>
+        <p>We’re thrilled to have you join us and look forward to seeing you succeed!</p>
+
+        <p>Best regards,</p>
+        <p>The AuthHub Team</p>
+        <p>https://authhub.tech</p>
+        <p>support@authhub.tech</p>
+    </body>
+    </html>
+    """
+    send_email(data.get("email"), subject, email_body)

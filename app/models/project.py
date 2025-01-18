@@ -41,7 +41,7 @@ class Project(BaseModel, Base):
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
         # insert Project at the correct node
-        if Project.search(module_id=module_id) is None:
+        if Project.search(module_id=kwargs.get("module_id")) is None:
             # list is empty therefore insert as head of the list
             self.prev_project_id = None
             self.next_project_id = None

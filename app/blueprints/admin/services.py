@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -121,7 +122,7 @@ def admin_create_new_student():
     <html>
     <body>
         <p>Dear {data.get("first_name")},</p>
-        <p>Welcome to Authority Innovations Hub! We are excited to have you onboard as you begin this journey with us</p>
+        <p>Welcome to Authority Innovations Hub in partnership with GDGoC KWASU! We are excited to have you onboard as you begin this journey with us</p>
         <p>Your account has been successfully created by an administrator. To get started, you’ll need to activate your account using the details provided below:</p>
         <p><b>Your Registration Details</b></p>
         <ul>
@@ -129,16 +130,17 @@ def admin_create_new_student():
         </ul>
         <p><b>Account Activation</b></p>
         <p>Please click the link below to activate your account:</p>
-        <p><a href="http://localhost:3000/auth/account/activate?reg_no={registration_number}">Activate My Account</a>
+        <p>
+            <a href="{os.getenv("WEB_DOMAIN")}/auth/account/activate">Activate My Account</a>
         </p>
         <p>Once activated, you’ll have full access to your dashboard and all the resources available on our platform.</p>
-        <p>If you encounter any issues during the activation process or have any questions, feel free to contact our support team at [support@authhub.tech].</p>
+        <p>If you encounter any issues during the activation process or have any questions, feel free to contact our support team at [{os.getenv("SUPPORT_EMAIL")}].</p>
         <p>We’re thrilled to have you join us and look forward to seeing you succeed!</p>
 
         <p>Best regards,</p>
         <p>The AuthHub Team</p>
-        <p>https://authhub.tech</p>
-        <p>support@authhub.tech</p>
+        <p><a href="https://authhub.tech">https://authhub.tech</a></p>
+        <p>{os.getenv("SUPPORT_EMAIL")}</p>
     </body>
     </html>
     """

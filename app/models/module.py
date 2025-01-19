@@ -13,7 +13,7 @@ class Module(BaseModel, Base):
 
     title = mapped_column(String(60), nullable=False)
     description = mapped_column(String(300))
-    status = mapped_column(ENUM("deleted", "draft", "published"), default="draft", nullable=False)
+    status = mapped_column(ENUM("deleted", "draft", "published"), default="published", nullable=False)
     
     next_module_id = mapped_column(ForeignKey("modules.id"), nullable=True)
     prev_module_id = mapped_column(ForeignKey("modules.id"), nullable=True)
@@ -29,7 +29,7 @@ class Module(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {"title", "status"}
+        required_keys = {"title"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

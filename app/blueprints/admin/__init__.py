@@ -1,7 +1,7 @@
 from flask import Blueprint
 from app.blueprints.admin.controllers import create_new_student, all_students, generate_project_submission
 from app.blueprints.admin.controllers import retrieve_assigned_project_submissions, retrieve_projects_with_submissions
-from app.blueprints.admin.controllers import grade_student_project, fix_email_error
+from app.blueprints.admin.controllers import grade_student_project
 
 admin_bp = Blueprint('admin', __name__)
 

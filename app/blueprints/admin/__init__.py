@@ -11,4 +11,3 @@ admin_bp.add_url_rule("/<project_id>/submissions/generate", view_func=generate_p
 admin_bp.add_url_rule("/<project_id>/assigned_submissions", view_func=retrieve_assigned_project_submissions, methods=["GET"])
 admin_bp.add_url_rule("/projects/with_submissions", view_func=retrieve_projects_with_submissions, methods=["GET"])
 admin_bp.add_url_rule("/project/grade", view_func=grade_student_project, methods=["PATCH"])
-admin_bp.add_url_rule("/student/fix_email_error", view_func=fix_email_error, methods=["GET"])

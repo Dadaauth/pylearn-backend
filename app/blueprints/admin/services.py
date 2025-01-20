@@ -136,6 +136,8 @@ def admin_create_new_student():
         <p>Once activated, you’ll have full access to your dashboard and all the resources available on our platform.</p>
         <p>If you encounter any issues during the activation process or have any questions, feel free to contact our support team at [{os.getenv("SUPPORT_EMAIL")}].</p>
         <p>We’re thrilled to have you join us and look forward to seeing you succeed!</p>
+        <p>Join the whatsapp group here: <a href="https://chat.whatsapp.com/JlyU3TLSs70EWA4atfpSNf">https://chat.whatsapp.com/JlyU3TLSs70EWA4atfpSNf</a></p>
+        <p>Join the discord server here: <a href="https://discord.gg/AczjSvv6">https://discord.gg/AczjSvv6</a></p>
 
         <p>Best regards,</p>
         <p>The AuthHub Team</p>

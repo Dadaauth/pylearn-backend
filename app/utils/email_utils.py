@@ -7,7 +7,6 @@ def send_email(recipient_email, subject, body):
     # Email details
     zoho_email = os.getenv("ZOHO_EMAIL")
     zoho_password =   os.getenv("ZOHO_EMAIL_PASSWORD")
-    recipient_email = "dadaauthourity23@gmail.com"
 
 
     # Set up the MIME structure

@@ -105,6 +105,9 @@ def admin_create_new_student():
     if not (data.get("first_name") and data.get("last_name") and data.get("email")):
         raise BadRequest("Missing required field(s): first_name, last_name, email")
     
+    if Student.search(email=data.get("email")) is not None:
+        raise BadRequest("Student Account created Already!")
+    
     student_count = Student.count() + 1
     registration_number = f"{datetime.now().year}/SWE/C1/{str(student_count).zfill(4)}"
     student_details = {

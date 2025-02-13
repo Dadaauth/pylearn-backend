@@ -1,7 +1,7 @@
 """MODULE Documentation"""
 import os
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, or_, select
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from app.models.base import Base
@@ -87,9 +87,19 @@ class DBStorage:
                 self.__session.rollback()
             return []
     
-    def count(self, cls):
+    def count(self, cls, **filters):
         try:
-            return self.__session.query(cls).count()
+            conditions = []
+
+            for key, value in filters.items():
+                field = getattr(cls, key)
+
+                if isinstance(value, tuple):
+                    conditions.append(or_(*[field == v for v in value]))
+                else:
+                    conditions.append(field == value)
+
+            return self.__session.query(cls).filter(*conditions).count()
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
             if self.__session.is_active:
@@ -97,8 +107,20 @@ class DBStorage:
             return False
     
     def search(self, cls, **filters):
-        sh =  [obj for obj in self.__session.scalars(select(cls).filter_by(**filters))]
-        return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
+        try:
+            conditions = []
+
+            for key, value in filters.items():
+                field = getattr(cls, key)
+
+                if isinstance(value, tuple):
+                    conditions.append(or_(*[field == v for v in value]))
+                else:
+                    conditions.append(field == value)
+            sh =  [obj for obj in self.__session.scalars(select(cls).filter(*conditions))]
+            return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
+        except Exception as e:
+            return None
 
     def save(self) -> None:
         try:

@@ -1,8 +1,15 @@
 from flask_jwt_extended import jwt_required
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions
-from .services import activate_student_account, ifetch_modules_for_student, release_first_project
+from .services import activate_student_account, count_completed_modules, count_completed_projects, ifetch_modules_for_student, release_first_project
 from .services import ifetch_project_for_student, ifetch_current_projects, isubmit_student_project, irelease_next_project
 
+
+@jwt_required()
+@handle_endpoint_exceptions
+def countCompleted():
+    modules = count_completed_modules()
+    projects = count_completed_projects()
+    return format_json_responses(data={"modules": modules, "projects": projects})
 
 @jwt_required()
 @handle_endpoint_exceptions

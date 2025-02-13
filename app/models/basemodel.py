@@ -67,8 +67,8 @@ class BaseModel:
         return g.db_storage.all(cls)
     
     @classmethod
-    def count(cls):
-        return g.db_storage.count(cls)
+    def count(cls, **filters: dict) -> int:
+        return g.db_storage.count(cls, **filters)
     
     @classmethod
     def search(cls, **filters: dict) -> list:

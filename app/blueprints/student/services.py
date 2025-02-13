@@ -7,6 +7,27 @@ from app.models.module import Module
 from app.models.project import Project, StudentProject
 
 
+def count_completed_modules():
+    student_id = get_jwt_identity()["id"]
+    all_modules = Module.all()
+    modules_count = Module.count()
+    completed_modules_count = 0
+    for module in all_modules:
+        projects_count = len(module.projects)
+        project_ids = []
+        for project in module.projects:
+            project_ids.append(project.id)
+        completed_projects = StudentProject.count(project_id=(pid for pid in project_ids), student_id=student_id, status=("submitted", "graded", "verified"))
+        if projects_count == completed_projects:
+            completed_modules_count += 1
+    return {"completed": completed_modules_count, "all": modules_count}
+
+def count_completed_projects():
+    student_id = get_jwt_identity()["id"]
+    completed_projects = StudentProject.count(student_id=student_id, status=("submitted", "graded", "verified"))
+    all_projects = Project.count()
+    return {"completed": completed_projects, "all": all_projects}
+
 def irelease_next_project(project_id: str):
     student_id = get_jwt_identity()["id"]
     project = Project.search(id=project_id)

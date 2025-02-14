@@ -46,15 +46,16 @@ class Project(BaseModel, Base):
             self.prev_project_id = None
             self.next_project_id = None
             return
+        prev_project_id = kwargs.get("prev_project_id")
+        module_id = kwargs.get("module_id")
+        if not prev_project_id:
+            head_project = Project.search(prev_project_id=None, module_id=module_id)
         
         self.save()
         self.refresh()
 
-        prev_project_id = kwargs.get("prev_project_id")
-        module_id = kwargs.get("module_id")
         if not prev_project_id:
             # Make first project in list
-            head_project = Project.search(prev_project_id=None, module_id=module_id)
             head_project.prev_project_id = self.id
             head_project.save()
 

@@ -40,14 +40,15 @@ class Module(BaseModel, Base):
             self.prev_module_id = None
             self.next_module_id = None
             return
+        prev_module_id = kwargs.get("prev_module_id")
+        if not prev_module_id:
+            head_module = Module.search(prev_module_id=None)
         
         self.save()
         self.refresh()
 
-        prev_module_id = kwargs.get("prev_module_id")
         if not prev_module_id:
             # Make first module in list
-            head_module = Module.search(prev_module_id=None)
             head_module.prev_module_id = self.id
             head_module.save()
 

@@ -5,9 +5,28 @@ from uuid import uuid4
 from flask_jwt_extended import get_jwt_identity
 from app.utils.helpers import extract_request_data, retrieve_model_info
 from app.utils.error_extensions import BadRequest, NotFound
-from app.models.user import Student
+from app.models.user import Student, Admin
 from app.models.project import StudentProject, Project
+from app.models.module import Module
 from app.utils.email_utils import send_email
+
+def ifetch_project(project_id):
+    project = Project.search(id=project_id)
+    if not project:
+        raise NotFound(f"Project with ID {project_id} not found")
+    
+    author = Admin.search(id=project.author_id)
+    module = Module.search(id=project.module_id)
+    if not author:
+        author = "NIL"
+    else:
+        author = f"{author.first_name} {author.last_name}"
+
+    project = project.to_dict()
+    project["author"] = author
+    project["module"] = module.title
+
+    return project
 
 def igrade_student_project():
     data = extract_request_data("json")

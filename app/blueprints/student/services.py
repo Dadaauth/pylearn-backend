@@ -17,7 +17,7 @@ def count_completed_modules():
         project_ids = []
         for project in module.projects:
             project_ids.append(project.id)
-        completed_projects = StudentProject.count(project_id=(pid for pid in project_ids), student_id=student_id, status=("submitted", "graded", "verified"))
+        completed_projects = StudentProject.count(project_id=tuple(pid for pid in project_ids), student_id=student_id, status=("submitted", "graded", "verified"))
         if projects_count == completed_projects:
             completed_modules_count += 1
     return {"completed": completed_modules_count, "all": modules_count}

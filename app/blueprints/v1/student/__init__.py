@@ -1,8 +1,10 @@
 from flask import Blueprint
-from app.blueprints.student.controllers import activate_account, countCompleted, fetch_modules_for_student, fetchproject
-from app.blueprints.student.controllers import fetchcurrentprojects, submitProject
+from app.blueprints.v1.student.controllers import activate_account, countCompleted, fetch_modules_for_student, fetchproject
+from app.blueprints.v1.student.controllers import fetchcurrentprojects, submitProject, create_new_student
 
 student_bp = Blueprint('student', __name__)
+
+student_bp.add_url_rule("/create", view_func=create_new_student, methods=["POST"])
 
 student_bp.add_url_rule('/account/activate', view_func=activate_account, methods=['POST'])
 student_bp.add_url_rule('/modules', view_func=fetch_modules_for_student, methods=['GET'])

@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.blueprints.module.controllers import update_module, fetch_modules, create_module
+from app.blueprints.v1.module.controllers import update_module, fetch_modules, create_module
 
 module_bp = Blueprint('module', __name__)
 

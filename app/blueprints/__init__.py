@@ -1,9 +1,9 @@
-from app.blueprints.auth import auth_bp
-from app.blueprints.module import module_bp
-from app.blueprints.project import project_bp
-from app.blueprints.admin import admin_bp
-from app.blueprints.mentor import mentor_bp
-from app.blueprints.student import student_bp
+from app.blueprints.v1.auth import auth_bp
+from app.blueprints.v1.module import module_bp
+from app.blueprints.v1.project import project_bp
+from app.blueprints.v1.admin import admin_bp
+from app.blueprints.v1.mentor import mentor_bp
+from app.blueprints.v1.student import student_bp
 
 def register_blueprints(app):
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')

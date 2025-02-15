@@ -2,7 +2,7 @@ from flask import request
 from flask_jwt_extended import get_current_user, jwt_required, get_jwt_identity, unset_jwt_cookies
 from flask_jwt_extended import create_access_token
 
-from app.blueprints.auth.services import create_user, user_login, user_exists, check_specific_user_role
+from app.blueprints.v1.auth.services import create_user, user_login, user_exists, check_specific_user_role
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, retrieve_model_info
 
 @jwt_required()

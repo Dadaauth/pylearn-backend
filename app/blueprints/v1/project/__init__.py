@@ -1,6 +1,6 @@
 from flask import Blueprint
-from app.blueprints.project.controllers import create_project, fetch_projects_for_module, fetch_single, update_single
-from app.blueprints.project.controllers import mark_project_as_done, retrieve_projects_status
+from app.blueprints.v1.project.controllers import create_project, fetch_projects_for_module, fetch_single, update_single
+from app.blueprints.v1.project.controllers import mark_project_as_done, retrieve_projects_status
 
 project_bp = Blueprint('project', __name__)
 

@@ -1,6 +1,6 @@
 from flask_jwt_extended import jwt_required
 from app.utils.helpers import admin_required, format_json_responses, handle_endpoint_exceptions, retrieve_model_info
-from .services import admin_create_new_student, all_students_data, ifetch_project, igenerate_project_submission, igrade_student_project
+from .services import all_students_data, ifetch_project, igenerate_project_submission, igrade_student_project
 from .services import iretrieve_projects_with_submissions, iretrieve_assigned_project_submissions
 
 
@@ -38,13 +38,6 @@ def retrieve_assigned_project_submissions(project_id):
 def retrieve_projects_with_submissions():
     projects = iretrieve_projects_with_submissions()
     return format_json_responses(data={"projects": projects})
-
-@jwt_required()
-@admin_required
-@handle_endpoint_exceptions
-def create_new_student():
-    admin_create_new_student()
-    return format_json_responses(201, message="Student created successfully.")
 
 @jwt_required()
 @admin_required

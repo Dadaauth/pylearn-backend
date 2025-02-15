@@ -4,8 +4,36 @@ from app.models.module import Module
 from app.models.project import Project, StudentProject
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
-from app.models.user import Admin
+from app.models.user import Admin, Student
 
+
+def iretrieve_assigned_project_submissions(project_id):
+    mentor_id = get_jwt_identity()["id"]
+    project = Project.search(id=project_id)
+    assigned_pjts = StudentProject.search(status="submitted", project_id=project_id, assigned_to=mentor_id)
+
+    if not assigned_pjts:
+        raise NotFound("No submitted projects")
+
+    tmp = []
+    if isinstance(assigned_pjts, StudentProject):
+        tmp.append(assigned_pjts)
+    elif isinstance(assigned_pjts, list):
+        for pjt in assigned_pjts:
+            tmp.append(pjt)
+
+    assigned_projects = {
+        "project": project.to_dict(),
+        "data": [],
+    }
+    for t in tmp:
+        student = Student.search(id=t.student_id)
+        data = {
+            "student": student.to_dict(),
+            "student_project": t.to_dict(),
+        }
+        assigned_projects.get("data").append(data)
+    return assigned_projects
 
 def igenerate_project_submission(project_id):
     mentor_id = get_jwt_identity()["id"]

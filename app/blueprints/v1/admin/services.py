@@ -25,34 +25,6 @@ def igrade_student_project():
     studentProject.feedback = data.get('feedback')
     studentProject.save()
 
-def iretrieve_assigned_project_submissions(project_id):
-    admin_id = get_jwt_identity()["id"]
-    project = Project.search(id=project_id)
-    assigned_pjts = StudentProject.search(status="submitted", project_id=project_id, assigned_to=admin_id)
-
-    if not assigned_pjts:
-        raise NotFound("No submitted projects")
-
-    tmp = []
-    if isinstance(assigned_pjts, StudentProject):
-        tmp.append(assigned_pjts)
-    elif isinstance(assigned_pjts, list):
-        for pjt in assigned_pjts:
-            tmp.append(pjt)
-
-    assigned_projects = {
-        "project": project.to_dict(),
-        "data": [],
-    }
-    for t in tmp:
-        student = Student.search(id=t.student_id)
-        data = {
-            "student": student.to_dict(),
-            "student_project": t.to_dict(),
-        }
-        assigned_projects.get("data").append(data)
-    return assigned_projects
-
 def iretrieve_projects_with_submissions():
     submissions = StudentProject.search(status="submitted")
     if not submissions:

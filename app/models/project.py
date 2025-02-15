@@ -178,9 +178,9 @@ class StudentProject(BaseModel, Base):
     status = mapped_column(ENUM("released", "submitted", "graded", "verified"), default="released", nullable=False)
     submission_file = mapped_column(String(300))
     submitted_on = mapped_column(DateTime)
-    assigned_to = mapped_column(ForeignKey("admins.id"))
+    assigned_to = mapped_column(ForeignKey("mentors.id"))
     graded_on = mapped_column(DateTime)
-    graded_by = mapped_column(ForeignKey("admins.id"))
+    graded_by = mapped_column(ForeignKey("mentors.id"))
     grade = mapped_column(Float)
     feedback = mapped_column(Text)
 

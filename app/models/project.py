@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Integer, String, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import DateTime, Integer, String, ForeignKey, Text, UniqueConstraint, Float
 from sqlalchemy.dialects.mysql import LONGTEXT, ENUM
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -181,7 +181,7 @@ class StudentProject(BaseModel, Base):
     assigned_to = mapped_column(ForeignKey("admins.id"))
     graded_on = mapped_column(DateTime)
     graded_by = mapped_column(ForeignKey("admins.id"))
-    grade = mapped_column(Integer)
+    grade = mapped_column(Float)
     feedback = mapped_column(Text)
 
     def __init__(self, **kwargs):

@@ -102,6 +102,7 @@ def ifetch_project_for_student(project_id):
     project["author"] = author
     project["module"] = module.title
     project["status"] = studentProject.status
+    project["grade"] = studentProject.grade
 
     return project
 

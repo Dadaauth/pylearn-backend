@@ -3,7 +3,6 @@ from app.utils.helpers import admin_required, format_json_responses, handle_endp
 from .services import igenerate_project_submission, igrade_student_project
 from .services import iretrieve_projects_with_submissions, iretrieve_assigned_project_submissions
 
-
 @jwt_required()
 @admin_required
 @handle_endpoint_exceptions

@@ -1,9 +1,16 @@
 from flask_jwt_extended import jwt_required
 
-from app.blueprints.v1.project.services import create_new_project, fetch_projects, ifetch_project
+from app.blueprints.v1.project.services import create_new_project, fetch_projects, ifetch_project, igenerate_project_submission
 from app.blueprints.v1.project.services import update_single_project_details, mark_a_project_as_done, _retrieve_projects_status
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required
 
+@jwt_required()
+@mentor_required
+@handle_endpoint_exceptions
+def generate_project_submission(project_id):
+    """For Mentors Only!!!"""
+    igenerate_project_submission(project_id)
+    return format_json_responses(message="Project Submission Generated For Mentor Successfully!")
 
 @jwt_required()
 @handle_endpoint_exceptions

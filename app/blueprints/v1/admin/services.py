@@ -73,17 +73,3 @@ def iretrieve_projects_with_submissions():
         projects_with_submissions.append(project.to_dict())
 
     return projects_with_submissions
-
-def igenerate_project_submission(project_id):
-    admin_id = get_jwt_identity()["id"]
-    submitted_projects = StudentProject.search(project_id=project_id, status="submitted", assigned_to=None)
-    if not submitted_projects:
-        raise NotFound("No Submitted Projects")
-
-    """Check how many projects were found"""
-    if isinstance(submitted_projects, StudentProject):
-        submitted_projects.assigned_to = admin_id
-        submitted_projects.save()
-    elif isinstance(submitted_projects, list):
-        submitted_projects[0].assigned_to = admin_id
-        submitted_projects[0].save()

@@ -13,13 +13,6 @@ def grade_student_project():
 @jwt_required()
 @admin_required
 @handle_endpoint_exceptions
-def generate_project_submission(project_id):
-    igenerate_project_submission(project_id)
-    return format_json_responses(message="Project Submission Generated For Admin Successfully!")
-
-@jwt_required()
-@admin_required
-@handle_endpoint_exceptions
 def retrieve_assigned_project_submissions(project_id):
     assigned_projects = iretrieve_assigned_project_submissions(project_id)
     return format_json_responses(data=assigned_projects)

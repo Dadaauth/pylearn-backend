@@ -6,6 +6,21 @@ from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
 from app.models.user import Admin
 
+
+def igenerate_project_submission(project_id):
+    mentor_id = get_jwt_identity()["id"]
+    submitted_projects = StudentProject.search(project_id=project_id, status="submitted", assigned_to=None)
+    if not submitted_projects:
+        raise NotFound("No Submitted Projects")
+
+    """Check how many projects were found"""
+    if isinstance(submitted_projects, StudentProject):
+        submitted_projects.assigned_to = mentor_id
+        submitted_projects.save()
+    elif isinstance(submitted_projects, list):
+        submitted_projects[0].assigned_to = mentor_id
+        submitted_projects[0].save()
+
 def ifetch_project(project_id):
     project = Project.search(id=project_id)
     if not project:

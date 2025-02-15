@@ -38,10 +38,3 @@ def retrieve_assigned_project_submissions(project_id):
 def retrieve_projects_with_submissions():
     projects = iretrieve_projects_with_submissions()
     return format_json_responses(data={"projects": projects})
-
-@jwt_required()
-@admin_required
-@handle_endpoint_exceptions
-def all_students():
-    students_data = all_students_data()
-    return format_json_responses(200, data={"students": students_data})

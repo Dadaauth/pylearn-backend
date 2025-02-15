@@ -1,7 +1,16 @@
 from flask_jwt_extended import jwt_required
-from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required
+from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required
 from .services import activate_student_account, count_completed_modules, count_completed_projects, ifetch_modules_for_student, release_first_project
 from .services import ifetch_project_for_student, ifetch_current_projects, isubmit_student_project, irelease_next_project, admin_create_new_student
+from .services import all_students_data
+
+
+@jwt_required()
+@mentor_required
+@handle_endpoint_exceptions
+def all_students():
+    students_data = all_students_data()
+    return format_json_responses(200, data={"students": students_data})
 
 @jwt_required()
 @admin_required

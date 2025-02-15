@@ -2,13 +2,23 @@ import os
 from uuid import uuid4
 from datetime import datetime, timezone
 from flask_jwt_extended import get_jwt_identity
-from app.utils.helpers import extract_request_data
+from app.utils.helpers import extract_request_data, retrieve_model_info
 from app.utils.email_utils import send_email
 from app.utils.error_extensions import BadRequest, InternalServerError, NotFound
 from app.models.user import Student, Admin
 from app.models.module import Module
 from app.models.project import Project, StudentProject
 
+
+def all_students_data():
+    students = Student.all()
+    students_data = [retrieve_model_info(student, ["id", \
+        "first_name", "last_name",\
+        "email", "registration_number", "status",\
+        "username"])\
+        for student in students]
+    students_data = list(reversed(students_data))
+    return students_data
 
 def count_completed_modules():
     student_id = get_jwt_identity()["id"]

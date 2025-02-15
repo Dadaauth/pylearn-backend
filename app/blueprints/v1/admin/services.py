@@ -105,13 +105,3 @@ def igenerate_project_submission(project_id):
     elif isinstance(submitted_projects, list):
         submitted_projects[0].assigned_to = admin_id
         submitted_projects[0].save()
-
-def all_students_data():
-    students = Student.all()
-    students_data = [retrieve_model_info(student, ["id", \
-                                                   "first_name", "last_name",\
-                                                    "email", "registration_number", "status",\
-                                                    "username"])\
-                    for student in students]
-    students_data = list(reversed(students_data))
-    return students_data

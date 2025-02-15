@@ -1,6 +1,6 @@
 from flask_jwt_extended import jwt_required
 from app.utils.helpers import admin_required, format_json_responses, handle_endpoint_exceptions
-from .services import igenerate_project_submission, igrade_student_project
+from .services import igrade_student_project
 from .services import iretrieve_projects_with_submissions, iretrieve_assigned_project_submissions
 
 @jwt_required()

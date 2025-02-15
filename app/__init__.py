@@ -22,7 +22,7 @@ def create_app(environment="development"):
     jwt = JWTManager(app)
 
     from app.blueprints import register_blueprints
-    from app.models.user import Admin, Student
+    from app.models.user import Admin, Mentor, Student
     from app.models import storage
     
     @jwt.user_lookup_loader
@@ -30,6 +30,8 @@ def create_app(environment="development"):
         identity = jwt_data["sub"]
         if identity['role'] == 'admin':
             return Admin.search(id=identity['id'])
+        elif identity['role'] == 'mentor':
+            return Mentor.search(id=identity['id'])
         elif identity['role'] == 'student':
             return Student.search(id=identity['id'])
         return None

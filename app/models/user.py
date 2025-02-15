@@ -103,6 +103,25 @@ class Admin(User, Base):
         """
         super().__init__(**kwargs)
 
+class Mentor(User, Base):
+    """
+    Mentor class that inherits from User and Base.
+    Attributes:
+        __tablename__ (str): The name of the table in the database.
+    Methods:
+        __init__(**kwargs): Initializes a Mentor instance with given keyword arguments.
+    """
+    __tablename__ = "mentors"
+
+    def __init__(self, **kwargs):
+        """
+        Initialize a new User instance with the given keyword arguments.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments passed to the superclass initializer.
+        """
+        super().__init__(**kwargs)
+
 class Student(User, Base):
     """
     Represents a student in the system.

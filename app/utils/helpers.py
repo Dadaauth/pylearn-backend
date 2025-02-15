@@ -108,6 +108,27 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def mentor_required(f):
+    """
+    A decorator to check if the logged-in user has a mentor role.
+
+    This decorator wraps around a function and checks if the user has a mentor role.
+    If the user does not have a mentor role, it returns a 403 Forbidden response.
+
+    Args:
+        f (function): The endpoint function to be decorated.
+
+    Returns:
+        function: The decorated function with mentor role check.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        identity = get_jwt_identity()
+        if not identity or (identity["role"] != 'mentor' and identity["role"] != 'admin'):
+            return format_json_responses(403, message="Forbidden: Mentor access required")
+        return f(*args, **kwargs)
+    return decorated_function
+
 def handle_endpoint_exceptions(f):
     """
     A decorator to handle exceptions for endpoint functions.

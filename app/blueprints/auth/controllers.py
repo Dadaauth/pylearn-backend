@@ -74,13 +74,18 @@ def register():
     data = request.json
     role = data.get("role")
 
-    if role not in ["student", "admin"]:
+    if role not in ["student", "mentor", "admin"]:
         raise ValueError("user role not specified")
 
     if role == "admin":
         if user_exists(data.get("email"), "admin"):
             raise ValueError("A user with this email already exists.")    
         user = create_user(data, "admin")
+
+    if role == "mentor":
+        if user_exists(data.get('email'), "mentor"):
+            raise ValueError("A user with this email already exists.")
+        user = create_user(data, "mentor")
 
     if role == "student":
         if user_exists(data.get('email'), "student"):

@@ -4,7 +4,7 @@ from app.blueprints.v1.student.controllers import fetchcurrentprojects, submitPr
 
 student_bp = Blueprint('student', __name__)
 
-# Admin and Mentor related functionalities
+# Admin and Mentor access only functionalities
 student_bp.add_url_rule("/create", view_func=create_new_student, methods=["POST"])
 student_bp.add_url_rule("/students", view_func=all_students, methods=["GET"])
 

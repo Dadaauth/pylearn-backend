@@ -1,8 +1,8 @@
 from flask_jwt_extended import jwt_required
 
-from app.blueprints.v1.project.services import create_new_project, fetch_projects, fetch_project_details_single
+from app.blueprints.v1.project.services import create_new_project, fetch_projects, ifetch_project
 from app.blueprints.v1.project.services import update_single_project_details, mark_a_project_as_done, _retrieve_projects_status
-from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required
+from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required
 
 
 @jwt_required()
@@ -19,10 +19,11 @@ def create_project():
     return format_json_responses(201, message="Resource created successfully")
 
 @jwt_required()
+@mentor_required
 @handle_endpoint_exceptions
 def fetch_single(project_id):
-    data = fetch_project_details_single(project_id)
-    return format_json_responses(data={"project": data}, message="Resource retrieved successfully")
+    project = ifetch_project(project_id)
+    return format_json_responses(data={"project": project})
 
 @jwt_required()
 @admin_required

@@ -7,24 +7,6 @@ from app.models.user import Student, Admin
 from app.models.project import StudentProject, Project
 from app.models.module import Module
 
-def ifetch_project(project_id):
-    project = Project.search(id=project_id)
-    if not project:
-        raise NotFound(f"Project with ID {project_id} not found")
-    
-    author = Admin.search(id=project.author_id)
-    module = Module.search(id=project.module_id)
-    if not author:
-        author = "NIL"
-    else:
-        author = f"{author.first_name} {author.last_name}"
-
-    project = project.to_dict()
-    project["author"] = author
-    project["module"] = module.title
-
-    return project
-
 def igrade_student_project():
     data = extract_request_data("json")
     admin_id = get_jwt_identity()["id"]

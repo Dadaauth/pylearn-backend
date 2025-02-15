@@ -4,6 +4,25 @@ from app.models.module import Module
 from app.models.project import Project, StudentProject
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
+from app.models.user import Admin
+
+def ifetch_project(project_id):
+    project = Project.search(id=project_id)
+    if not project:
+        raise NotFound(f"Project with ID {project_id} not found")
+    
+    author = Admin.search(id=project.author_id)
+    module = Module.search(id=project.module_id)
+    if not author:
+        author = "NIL"
+    else:
+        author = f"{author.first_name} {author.last_name}"
+
+    project = project.to_dict()
+    project["author"] = author
+    project["module"] = module.title
+
+    return project
 
 def fetch_projects():
     module_id = extract_request_data("args").get('module_id')
@@ -35,13 +54,6 @@ def create_new_project():
     data["status"] = status
     
     Project(**data).save()
-
-def fetch_project_details_single(project_id):
-    project = Project.search(id=project_id)
-    if not project:
-        raise NotFound(f"Project with ID {project_id} not found")
-    
-    return project.to_dict()
 
 def update_single_project_details(project_id):
     data = extract_request_data("json")

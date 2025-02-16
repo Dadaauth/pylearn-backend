@@ -60,9 +60,9 @@ def login():
 @handle_endpoint_exceptions
 def register():
     """
-    Registers a new user using the provided JSON data.
+    Registers a new user (admin and mentor only) using the provided JSON data.
 
-    This function attempts to create a new student record based on the JSON data
+    This function attempts to create a new user record based on the JSON data
     received in the request. If successful, it returns a JSON response with a
     status code of 201 and a success message. If a ValueError occurs, it returns
     a JSON response with a status code of 400 and the error message. For any other
@@ -74,7 +74,7 @@ def register():
     data = request.json
     role = data.get("role")
 
-    if role not in ["student", "mentor", "admin"]:
+    if role not in ["mentor", "admin"]:
         raise ValueError("user role not specified")
 
     if role == "admin":
@@ -86,11 +86,6 @@ def register():
         if user_exists(data.get('email'), "mentor"):
             raise ValueError("A user with this email already exists.")
         user = create_user(data, "mentor")
-
-    if role == "student":
-        if user_exists(data.get('email'), "student"):
-            raise ValueError("A user with this email already exists.")
-        user = create_user(data, "student")
 
     return format_json_responses(201,
                                 data={

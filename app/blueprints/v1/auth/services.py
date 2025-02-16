@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 from flask_jwt_extended import create_access_token, create_refresh_token, current_user, get_jwt_header, get_jwt_identity
 
 from app.models.user import Student, Admin, Mentor
@@ -57,17 +58,23 @@ def verify_is_admin(id):
     if admin is None:
         raise UnAuthenticated("Only Admins can register mentor accounts")
 
-def create_user(data: dict, role: str = "student") -> dict:
+def create_user(data: dict, role: str) -> dict:
     """Creates a new user record in the database
     data contains:
         - first_name, last_name, email, password (all required)
     """
     user = None
-    if role == "student":
-        user = Student(**data)
-    elif role == "mentor":
+    if role == "mentor":
         verify_is_admin(get_jwt_identity()["id"])
-        user = Mentor(**data)
+        details = {
+            "email": data.get('email'),
+            "first_name": data.get('first_name'),
+            "last_name": data.get('last_name'),
+            "password": "placeholder",
+            "username": str(uuid4()),
+            "status": "inactive",
+        }
+        user = Mentor(**details)
     elif role == "admin":
         if data.get("admin_reg_code") != os.getenv("ADMIN_REGISTRATION_PASSCODE"):
             raise UnAuthenticated("Invalid admin registration passcode")

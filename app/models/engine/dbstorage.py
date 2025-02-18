@@ -15,6 +15,8 @@ from app.models.leaderboard import LeaderBoard
 from app.models.notification import Notification
 from app.models.point import Point
 from app.models.streak import Streak
+from app.models.course import Course
+from app.models.cohort import Cohort
 
 
 DB_CONNECTION_STRING = os.environ.get("DB_CONNECTION_STRING")

@@ -18,6 +18,9 @@ class Module(BaseModel, Base):
     next_module_id = mapped_column(ForeignKey("modules.id"), nullable=True)
     prev_module_id = mapped_column(ForeignKey("modules.id"), nullable=True)
 
+    course_id = mapped_column(ForeignKey("courses.id"), nullable=False)
+    course = relationship("Course", back_populates="modules")
+
     projects = relationship("Project", back_populates="module")
 
     next_module = relationship("Module", remote_side="Module.id", foreign_keys=[next_module_id])
@@ -29,20 +32,21 @@ class Module(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {"title"}
+        required_keys = {"title", "course_id"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
         # insert Module at the correct node
-        if Module.count() == 0:
+        if Module.search(course_id=kwargs.get("course_id")) is None:
             # insert as head of the list
             self.prev_module_id = None
             self.next_module_id = None
             return
         prev_module_id = kwargs.get("prev_module_id")
+        course_id = kwargs.get("course_id")
         if not prev_module_id:
-            head_module = Module.search(prev_module_id=None)
+            head_module = Module.search(prev_module_id=None, course_id=course_id)
         
         self.save()
         self.refresh()
@@ -54,7 +58,7 @@ class Module(BaseModel, Base):
 
             self.next_module_id = head_module.id
         else:
-            prev_module = Module.search(id=prev_module_id)
+            prev_module = Module.search(id=prev_module_id, course_id=course_id)
             if prev_module is None:
                 raise NotFound("Previous Module Not Found")
             next_m_id = prev_module.next_module_id
@@ -63,7 +67,7 @@ class Module(BaseModel, Base):
             self.next_module_id = next_m_id
 
             # Check if the next module exists
-            next_module = Module.search(id=next_m_id)
+            next_module = Module.search(id=next_m_id, course_id=course_id)
             if next_module:
                 next_module.prev_module_id = self.id
                 next_module.save()

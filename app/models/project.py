@@ -112,6 +112,9 @@ class Project(BaseModel, Base):
                 Code for if the client is trying
                 to update the order of the projects
                 in the linked list.
+
+                Note: This code also works if the
+                client is trying to move the project to another module
             """
             next_project = Project.search(id=self.next_project_id)
             prev_project = Project.search(id=self.prev_project_id)

@@ -1,6 +1,5 @@
-from sqlalchemy import Integer, String, Enum, null
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.dialects.mysql import MEDIUMTEXT
+from sqlalchemy import Integer, String, Enum, ForeignKey
+from sqlalchemy.orm import mapped_column, relationship
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 from app.models.basemodel import BaseModel
@@ -112,6 +111,9 @@ class Mentor(User, Base):
         __init__(**kwargs): Initializes a Mentor instance with given keyword arguments.
     """
     __tablename__ = "mentors"
+    # TODO: create a table for many to many relationships between cohorts and mentors
+    #   This table will also determine the course the Mentor can access since each
+    #   cohort binds itself to a particular course.
 
     def __init__(self, **kwargs):
         """
@@ -133,6 +135,10 @@ class Student(User, Base):
     __tablename__ = "students"
     points = mapped_column(Integer, nullable=False, default=0)
     registration_number = mapped_column(String(100), nullable=False)
+    # cohort already contains the course the student is taking
+    cohort_id = mapped_column(ForeignKey("cohorts.id"))
+
+    cohort = relationship("Cohort", back_populates="students")
 
     def __init__(self, **kwargs):
         """

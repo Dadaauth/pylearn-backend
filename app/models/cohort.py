@@ -17,6 +17,7 @@ class Cohort(BaseModel, Base):
 
     course = relationship("Course")
     students = relationship("Student", back_populates="cohort")
+    mentors = relationship("MentorCohort", back_populates="cohort")
 
     def __init__(self, **kwargs):
         """

@@ -102,6 +102,23 @@ class Admin(User, Base):
         """
         super().__init__(**kwargs)
 
+
+class MentorCohort(Base):
+    """
+    Association table for many-to-many relationship between mentors and cohorts.
+    Attributes:
+        __tablename__ (str): The name of the table in the database.
+        mentor_id (int): Foreign key referencing the mentor.
+        cohort_id (int): Foreign key referencing the cohort.
+    """
+    __tablename__ = "mentor_cohort"
+    mentor_id = mapped_column(ForeignKey("mentors.id"), primary_key=True)
+    cohort_id = mapped_column(ForeignKey("cohorts.id"), primary_key=True)
+
+    mentor = relationship("Mentor", back_populates="cohorts")
+    cohort = relationship("Cohort", back_populates="mentors")
+
+
 class Mentor(User, Base):
     """
     Mentor class that inherits from User and Base.
@@ -111,9 +128,7 @@ class Mentor(User, Base):
         __init__(**kwargs): Initializes a Mentor instance with given keyword arguments.
     """
     __tablename__ = "mentors"
-    # TODO: create a table for many to many relationships between cohorts and mentors
-    #   This table will also determine the course the Mentor can access since each
-    #   cohort binds itself to a particular course.
+    cohorts = relationship("MentorCohort", back_populates="mentor")
 
     def __init__(self, **kwargs):
         """
@@ -123,6 +138,7 @@ class Mentor(User, Base):
             **kwargs: Arbitrary keyword arguments passed to the superclass initializer.
         """
         super().__init__(**kwargs)
+
 
 class Student(User, Base):
     """

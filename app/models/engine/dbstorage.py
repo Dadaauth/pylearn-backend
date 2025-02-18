@@ -8,7 +8,7 @@ from app.models.base import Base
 
 # Make sure every ORM mapped model is imported here
 # before calling Base.metadata.create_all()
-from app.models.user import Admin, Student
+from app.models.user import Admin, Student, Mentor, MentorCohort
 from app.models.project import Project, StudentProject
 from app.models.module import Module
 from app.models.leaderboard import LeaderBoard

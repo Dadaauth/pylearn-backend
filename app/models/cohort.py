@@ -25,7 +25,7 @@ class Cohort(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {"title", "course_id"}
+        required_keys = {"name", "course_id"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

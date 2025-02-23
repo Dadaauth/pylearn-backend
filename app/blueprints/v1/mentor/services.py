@@ -1,5 +1,7 @@
+from flask_jwt_extended import get_jwt_identity
 
-from app.models.user import Mentor
+from app.models.user import Mentor, MentorCohort
+from app.models.course import Course
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound, InternalServerError
 
@@ -39,3 +41,47 @@ def activate_mentor_account():
         "status": "active"
     })
     mentor.save()
+
+def imentor_assigned_cohorts():
+    mentor = Mentor.search(id=get_jwt_identity()["id"])
+    if not mentor:
+        raise NotFound(f"Mentor account not found!")
+    if not mentor.cohorts:
+        raise NotFound(f"No assigned cohorts to mentor")
+    
+    tmp = mentor.cohorts
+    cohorts_list = []
+    if isinstance(tmp, MentorCohort):
+        course = Course.search(id=tmp.course_id)
+        tmp = tmp.to_dict()
+        tmp["course"] = course.to_dict()
+        cohorts_list.append(tmp)
+    if isinstance(tmp, list):
+        for cohort in tmp:
+            course = Course.search(id=cohort.course_id)
+            cohort = cohort.to_dict()
+            cohort["course"] = course.to_dict()
+            cohorts_list.append(cohort)
+    return cohorts_list
+
+def imentor_assigned_cohorts_for_admin(mentor_id):
+    mentor = Mentor.search(id=mentor_id)
+    if not mentor:
+        raise NotFound(f"Mentor with ID [{mentor_id}] not found!")
+    if not mentor.cohorts:
+        raise NotFound(f"No assigned cohorts to mentor with ID [{mentor_id}]")
+    
+    tmp = mentor.cohorts
+    cohorts_list = []
+    if isinstance(tmp, MentorCohort):
+        course = Course.search(id=tmp.course_id)
+        tmp = tmp.to_dict()
+        tmp["course"] = course.to_dict()
+        cohorts_list.append(tmp)
+    if isinstance(tmp, list):
+        for cohort in tmp:
+            course = Course.search(id=cohort.course_id)
+            cohort = cohort.to_dict()
+            cohort["course"] = course.to_dict()
+            cohorts_list.append(cohort)
+    return cohorts_list

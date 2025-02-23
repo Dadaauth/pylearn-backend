@@ -150,8 +150,7 @@ class Student(User, Base):
     """
     __tablename__ = "students"
     points = mapped_column(Integer, nullable=False, default=0)
-    registration_number = mapped_column(String(100), nullable=False)
-    # cohort already contains the course the student is taking
+    course_id = mapped_column(ForeignKey("courses.id"), nullable=False)
     cohort_id = mapped_column(ForeignKey("cohorts.id"))
 
     cohort = relationship("Cohort", back_populates="students")
@@ -165,7 +164,7 @@ class Student(User, Base):
         """
         super().__init__(**kwargs)
 
-        required_keys = {"registration_number"}
+        required_keys = {"course_id"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

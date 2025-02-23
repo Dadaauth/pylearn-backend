@@ -3,6 +3,7 @@ from uuid import uuid4
 from flask_jwt_extended import create_access_token, create_refresh_token, current_user, get_jwt_header, get_jwt_identity
 
 from app.models.user import Student, Admin, Mentor
+from app.models.cohort import Cohort
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, InternalServerError, UnAuthenticated
 
@@ -44,6 +45,18 @@ def user_login(credentials):
         raise BadRequest("Account not yet activated")
     if not verify_password(user, credentials.get("password")):
         raise BadRequest("Invalid credentials")
+    
+    if isinstance(user, Student):
+        if not user.cohort_id:
+            raise BadRequest("Student not assigned to cohort")
+        cohort = Cohort.search(id=user.cohort_id)
+        if not cohort:
+            raise BadRequest("Student not assigned to cohort")
+        if cohort.status == "pending":
+            raise BadRequest("Student Cohort is not yet active")
+        
+    if user.status != "active":
+        raise BadRequest("User account is not yet active")
 
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
     refresh_token = create_refresh_token(identity={"id": user.id, "role": credentials.get("role")})

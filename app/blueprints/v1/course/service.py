@@ -1,4 +1,6 @@
+from app.models.user import Student
 from app.models.course import Course
+from app.models.cohort import Cohort
 from app.models.module import Module
 from app.models.project import Project
 from app.utils.helpers import extract_request_data
@@ -15,11 +17,15 @@ def iretrieve_all_courses():
     tmp = Course.all()
     if not tmp: raise NotFound("No courses found")
     if isinstance(tmp, Course):
-        return [tmp.to_dict()]
+        course_dict = tmp.to_dict()
+        course_dict["cohorts"] = retrieve_cohorts_for_course(tmp.id)
+        return [course_dict]
     
     courses_list = []
     for course in tmp:
-        courses_list.append(course.to_dict())
+        course_dict = course.to_dict()
+        course_dict["cohorts"] = retrieve_cohorts_for_course(course.id)
+        courses_list.append(course_dict)
     return courses_list
 
 def iretrieve_single_course(course_id):
@@ -73,12 +79,28 @@ def idelete_course(course_id):
         raise NotFound(f"Course with ID [{course_id}] not found!")
     course.delete()
 
+def retrieve_cohorts_for_course(course_id):
+    tmp = Cohort.search(course_id=course_id)
+    cohorts = []
+    if isinstance(tmp, Cohort):
+        cohort_dict = tmp.to_dict()
+        cohort_dict["students"] = Student.count(cohort_id=tmp.id)
+        cohorts.append(cohort_dict)
+    if isinstance(tmp, list):
+        for cohort in tmp:
+            cohort_dict = cohort.to_dict()
+            cohort_dict["students"] = Student.count(cohort_id=cohort.id)
+            cohorts.append(cohort_dict)
+    return cohorts
+
 def iretrieve_all_course_data(course_id):
-    course_with_modules = iretrieve_single_course_with_modules(course_id)
-    modules = course_with_modules["modules"]
+    course = iretrieve_single_course_with_modules(course_id)
+    modules = course["modules"]
 
     for module in modules:
         module['projects'] = retrieve_project_for_module(module.get("id"))
 
-    course_with_modules["modules"] = modules
-    return course_with_modules
+    course["modules"] = modules
+    course["cohorts"] = retrieve_cohorts_for_course(course_id)
+    
+    return course

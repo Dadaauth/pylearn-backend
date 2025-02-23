@@ -12,7 +12,6 @@ def create_course():
     icreate_course()
     return format_json_responses(201, message="Course creation successful")
 
-@jwt_required()
 @handle_endpoint_exceptions
 def retrieve_all_courses():
     courses = iretrieve_all_courses()

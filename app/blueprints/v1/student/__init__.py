@@ -1,14 +1,16 @@
 from flask import Blueprint
 from app.blueprints.v1.student.controllers import activate_account, countCompleted, fetch_modules_for_student, fetchproject
-from app.blueprints.v1.student.controllers import fetchcurrentprojects, submitProject, create_new_student, all_students
+from app.blueprints.v1.student.controllers import fetchcurrentprojects, submitProject, new_student_registration, all_students
+from .controllers import retrieve_students_with_no_cohort
 
 student_bp = Blueprint('student', __name__)
 
 # Admin and Mentor access only functionalities
-student_bp.add_url_rule("/create", view_func=create_new_student, methods=["POST"])
 student_bp.add_url_rule("/all", view_func=all_students, methods=["GET"])
+student_bp.add_url_rule("/no-cohort/<course_id>", view_func=retrieve_students_with_no_cohort, methods=["GET"])
 
 # Student Functionalities
+student_bp.add_url_rule("/register", view_func=new_student_registration, methods=["POST"])
 student_bp.add_url_rule('/account/activate', view_func=activate_account, methods=['POST'])
 student_bp.add_url_rule('/modules', view_func=fetch_modules_for_student, methods=['GET'])
 student_bp.add_url_rule('/project/<project_id>', view_func=fetchproject, methods=['GET'])

@@ -1,5 +1,3 @@
-import os
-from uuid import uuid4
 from datetime import datetime, timezone
 from flask_jwt_extended import get_jwt_identity
 from app.utils.helpers import extract_request_data, retrieve_model_info
@@ -8,6 +6,7 @@ from app.utils.error_extensions import BadRequest, InternalServerError, NotFound
 from app.models.user import Student, Admin
 from app.models.module import Module
 from app.models.project import Project, StudentProject
+from app.models.course import Course
 
 
 def all_students_data():
@@ -221,53 +220,29 @@ def release_first_project(student_id):
         status="released"
     ).save()
 
-def admin_create_new_student():
+def iretrieve_students_with_no_cohort(course_id):
+    tmp = Student.search(course_id=course_id, cohort_id=None)
+    students = [] 
+    if isinstance(tmp, Student):
+        students.append(tmp.basic_info())
+    elif isinstance(tmp, list):
+        for student in tmp:
+            students.append(student.basic_info())
+    return students
+
+def student_create_new_account():
     data = extract_request_data("json")
-    if not (data.get("first_name") and data.get("last_name") and data.get("email")):
-        raise BadRequest("Missing required field(s): first_name, last_name, email")
+    if not (data.get("first_name") and data.get("last_name") and data.get("email") and data.get("course_id")):
+        raise BadRequest("Missing required field(s): first_name, last_name, email, course_id")
     
     if Student.search(email=data.get("email")) is not None:
         raise BadRequest("Student Account created Already!")
     
-    student_count = Student.count() + 1
-    registration_number = f"{datetime.now().year}/SWE/C1/{str(student_count).zfill(4)}"
+    if not Course.search(id=data.get("course_id")):
+        raise BadRequest("Selected Course does not exist!")
+
     student_details = {
-        "first_name": data["first_name"],
-        "last_name": data["last_name"],
-        "email": data["email"],
-        "username": str(uuid4()),
-        "password": "placeholder",
+        **data,
         "status": "inactive",
-        "registration_number": registration_number
     }
     Student(**student_details).save()
-    subject = "Welcome to AuthHub! Activate Your Account Now"
-    email_body = f"""
-    <html>
-    <body>
-        <p>Dear {data.get("first_name")},</p>
-        <p>Welcome to Authority Innovations Hub in partnership with GDGoC KWASU! We are excited to have you onboard as you begin this journey with us</p>
-        <p>Your account has been successfully created by an administrator. To get started, you’ll need to activate your account using the details provided below:</p>
-        <p><b>Your Registration Details</b></p>
-        <ul>
-            <li>Registration Number: {registration_number}</li>
-        </ul>
-        <p><b>Account Activation</b></p>
-        <p>Please click the link below to activate your account:</p>
-        <p>
-            <a href="{os.getenv("WEB_DOMAIN")}/auth/account/activate">Activate My Account</a>
-        </p>
-        <p>Once activated, you’ll have full access to your dashboard and all the resources available on our platform.</p>
-        <p>If you encounter any issues during the activation process or have any questions, feel free to contact our support team at [{os.getenv("SUPPORT_EMAIL")}].</p>
-        <p>We’re thrilled to have you join us and look forward to seeing you succeed!</p>
-        <p>Join the whatsapp group here: <a href="https://chat.whatsapp.com/JlyU3TLSs70EWA4atfpSNf">https://chat.whatsapp.com/JlyU3TLSs70EWA4atfpSNf</a></p>
-        <p>Join the discord server here: <a href="https://discord.gg/AczjSvv6">https://discord.gg/AczjSvv6</a></p>
-
-        <p>Best regards,</p>
-        <p>The AuthHub Team</p>
-        <p><a href="https://authhub.tech">https://authhub.tech</a></p>
-        <p>{os.getenv("SUPPORT_EMAIL")}</p>
-    </body>
-    </html>
-    """
-    send_email(data.get("email"), subject, email_body)

@@ -2,7 +2,7 @@ from app.models.user import Student
 from app.models.course import Course
 from app.models.cohort import Cohort
 from app.models.module import Module
-from app.models.project import Project
+from app.models.project import AdminProject, CohortProject, StudentProject
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
 
@@ -53,9 +53,9 @@ def iretrieve_single_course_with_modules(course_id):
     return course
 
 def retrieve_project_for_module(module_id):
-    tmp = Project.search(module_id=module_id)
+    tmp = AdminProject.search(module_id=module_id)
     projects = []
-    if isinstance(tmp, Project):
+    if isinstance(tmp, AdminProject):
         projects.append(tmp.to_dict())
     if isinstance(tmp, list):
         for project in tmp:

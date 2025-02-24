@@ -1,7 +1,7 @@
 from flask_jwt_extended import jwt_required
 
 from app.blueprints.v1.project.services import create_new_project, fetch_projects, ifetch_project, igenerate_project_submission
-from app.blueprints.v1.project.services import update_single_project_details, mark_a_project_as_done, _retrieve_projects_status
+from app.blueprints.v1.project.services import update_single_project_details
 from app.blueprints.v1.project.services import iretrieve_assigned_project_submissions, igrade_student_project, iretrieve_projects_with_submissions
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required
 
@@ -62,25 +62,3 @@ def fetch_single(project_id):
 def update_single(project_id):
     update_single_project_details(project_id)
     return format_json_responses(message="Resource Updated Successfully!")
-
-
-
-
-
-
-
-
-
-
-
-
-
-@handle_endpoint_exceptions
-def retrieve_projects_status():
-    data = _retrieve_projects_status()
-    return format_json_responses(data=data, message="Record retrieved successfully")
-
-@handle_endpoint_exceptions
-def mark_project_as_done():
-    mark_a_project_as_done()
-    return format_json_responses(message="Operation successfull")

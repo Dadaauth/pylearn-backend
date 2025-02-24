@@ -19,13 +19,6 @@ class BaseProject(BaseModel):
     author_id = mapped_column(ForeignKey("admins.id"), nullable=False)
     course_id = mapped_column(ForeignKey("courses.id"), nullable=False)
 
-    next_project_id = mapped_column(ForeignKey("projects.id"), nullable=True)
-    prev_project_id = mapped_column(ForeignKey("projects.id"), nullable=True)
-
-    author = relationship("Admin")
-    next_project = relationship("Project", remote_side="Project.id", foreign_keys=[next_project_id])
-    prev_project = relationship("Project", remote_side="Project.id", foreign_keys=[prev_project_id])
-
     def __init__(self, **kwargs):
         """
         """
@@ -190,7 +183,11 @@ class AdminProject(BaseProject, Base):
     # How long after the previous project should this project be released?
     # 0 means immediately
     release_range = mapped_column(Integer, nullable=False)
+    next_project_id = mapped_column(ForeignKey("admin_projects.id"), nullable=True)
+    prev_project_id = mapped_column(ForeignKey("admin_projects.id"), nullable=True)
 
+    next_project = relationship("AdminProject", remote_side="AdminProject.id", foreign_keys=[next_project_id])
+    prev_project = relationship("AdminProject", remote_side="AdminProject.id", foreign_keys=[prev_project_id])
 
     def __init__(self, **kwargs):
         """
@@ -211,6 +208,11 @@ class CohortProject(BaseProject, Base):
 
     start_date = mapped_column(DateTime, nullable=False)
     end_date = mapped_column(DateTime, nullable=False)
+    next_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
+    prev_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
+
+    next_project = relationship("CohortProject", remote_side="CohortProject.id", foreign_keys=[next_project_id])
+    prev_project = relationship("CohortProject", remote_side="CohortProject.id", foreign_keys=[prev_project_id])
 
     def __init__(self, **kwargs):
         """

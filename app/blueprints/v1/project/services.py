@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from flask_jwt_extended import get_jwt_identity
 
 from app.models.module import Module
+from app.models.course import Course
 from app.models.project import AdminProject, StudentProject, CohortProject
 from app.utils.helpers import extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound
@@ -109,13 +110,34 @@ def ifetch_project(project_id):
 
     return project
 
-def fetch_projects():
+
+def ifetch_projects_for_cohort(course_id):
+    module_id = extract_request_data("args").get('module_id')
+
+    if module_id:
+        projects = CohortProject.search(module_id=module_id)
+    else:
+        projects = CohortProject.search(course_id=course_id)
+
+    p_list = []
+
+    if not projects or projects is None:
+        raise NotFound("No projects found")
+
+    if isinstance(projects, list):
+        for project in projects:
+            p_list.append(project.to_dict())
+    elif isinstance(projects, CohortProject):
+        p_list = [projects.to_dict()]
+    return p_list
+
+def ifetch_projects_for_admin(course_id):
     module_id = extract_request_data("args").get('module_id')
 
     if module_id:
         projects = AdminProject.search(module_id=module_id)
     else:
-        projects = AdminProject.all()
+        projects = AdminProject.search(course_id=course_id)
 
     p_list = []
 
@@ -131,6 +153,12 @@ def fetch_projects():
 
 def create_new_project():
     data = extract_request_data("json")
+
+    if not data.get("course_id"):
+        raise BadRequest("Missing required field: course_id")
+
+    if not Course.search(id=data.get("course_id")):
+        raise BadRequest(f"Course with ID: {data.get("course_id")} not found!")
 
     status = "draft"
     if data.get("mode") == "publish": status = "published"

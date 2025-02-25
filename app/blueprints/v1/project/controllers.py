@@ -1,7 +1,7 @@
 from flask_jwt_extended import jwt_required
 
-from app.blueprints.v1.project.services import create_new_project, fetch_projects, ifetch_project, igenerate_project_submission
-from app.blueprints.v1.project.services import update_single_project_details
+from app.blueprints.v1.project.services import create_new_project, ifetch_projects_for_admin, ifetch_project, igenerate_project_submission
+from app.blueprints.v1.project.services import update_single_project_details, ifetch_projects_for_cohort
 from app.blueprints.v1.project.services import iretrieve_assigned_project_submissions, igrade_student_project, iretrieve_projects_with_submissions
 from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required
 
@@ -38,8 +38,15 @@ def generate_project_submission(project_id):
 
 @jwt_required()
 @handle_endpoint_exceptions
-def fetch_projects_for_module():
-    projects = fetch_projects()
+def fetch_projects_for_cohort(course_id):
+    projects = ifetch_projects_for_cohort(course_id)
+    return format_json_responses(data={"projects": projects})
+
+@jwt_required()
+@admin_required
+@handle_endpoint_exceptions
+def fetch_projects_for_admin(course_id):
+    projects = ifetch_projects_for_admin(course_id)
     return format_json_responses(data={"projects": projects})
 
 @jwt_required()

@@ -52,8 +52,6 @@ def user_login(credentials):
         cohort = Cohort.search(id=user.cohort_id)
         if not cohort:
             raise BadRequest("Student not assigned to cohort")
-        if cohort.status == "pending":
-            raise BadRequest("Student Cohort is not yet active")
         
     if user.status != "active":
         raise BadRequest("User account is not yet active")

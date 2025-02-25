@@ -19,6 +19,6 @@ def update_module(module_id):
 
 @jwt_required()
 @handle_endpoint_exceptions
-def fetch_modules():
-    modules = ifetch_modules()
+def fetch_modules(course_id):
+    modules = ifetch_modules(course_id)
     return format_json_responses(data={"modules": modules})

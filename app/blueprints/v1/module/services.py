@@ -11,10 +11,12 @@ def iupdate_module(module_id):
     module.update(**data)
     module.save()
 
-def ifetch_modules():
-    mds = Module.all()
+def ifetch_modules(course_id):
+    mds = Module.search(course_id=course_id)
     if not mds:
         raise NotFound("No Module Found")
+
+    if isinstance(mds, Module): return [mds.to_dict()]
     return [mod.to_dict() for mod in mds]
 
 def icreate_module():

@@ -52,15 +52,17 @@ def imentor_assigned_cohorts():
     tmp = mentor.cohorts
     cohorts_list = []
     if isinstance(tmp, MentorCohort):
-        course = Course.search(id=tmp.course_id)
-        tmp = tmp.to_dict()
-        tmp["course"] = course.to_dict()
-        cohorts_list.append(tmp)
+        cohort = tmp.cohort
+        course = cohort.course.to_dict()
+        cohort = cohort.to_dict()
+        cohort["course"] = course
+        cohorts_list.append(cohort)
     if isinstance(tmp, list):
-        for cohort in tmp:
-            course = Course.search(id=cohort.course_id)
+        for mentor_cohort in tmp:
+            cohort = mentor_cohort.cohort
+            course = cohort.course.to_dict()
             cohort = cohort.to_dict()
-            cohort["course"] = course.to_dict()
+            cohort["course"] = course
             cohorts_list.append(cohort)
     return cohorts_list
 
@@ -74,14 +76,16 @@ def imentor_assigned_cohorts_for_admin(mentor_id):
     tmp = mentor.cohorts
     cohorts_list = []
     if isinstance(tmp, MentorCohort):
-        course = Course.search(id=tmp.course_id)
-        tmp = tmp.to_dict()
-        tmp["course"] = course.to_dict()
-        cohorts_list.append(tmp)
+        cohort = tmp.cohort
+        course = cohort.course.to_dict()
+        cohort = cohort.to_dict()
+        cohort["course"] = course
+        cohorts_list.append(cohort)
     if isinstance(tmp, list):
-        for cohort in tmp:
-            course = Course.search(id=cohort.course_id)
+        for mentor_cohort in tmp:
+            cohort = mentor_cohort.cohort
+            course = cohort.course.to_dict()
             cohort = cohort.to_dict()
-            cohort["course"] = course.to_dict()
+            cohort["course"] = course
             cohorts_list.append(cohort)
     return cohorts_list

@@ -19,3 +19,7 @@ Then run:
 ```python
 python run.py
 ```
+
+
+Install RabbitMQ on the target machine
+Install Celery on the target machine. If possible install as a system-wide package

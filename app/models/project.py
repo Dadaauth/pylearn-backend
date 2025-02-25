@@ -138,7 +138,7 @@ class BaseProject(BaseModel):
                 project.next_project_id = head_project.id
                 head_project.prev_project_id = project.id
 
-        super().update(**kwargs)
+        super().update(project, **kwargs)
 
     def sort_projects(projects):
         if projects is None or projects == []: return projects
@@ -192,15 +192,18 @@ class AdminProject(BaseProject, Base):
     def __init__(self, **kwargs):
         """
         """
-        super().__init__()
+        super().__init__(**kwargs)
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'status'}
+        required_keys = {'status', 'duration_in_days', 'release_range'}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
         super().insert_project_at_correct_node(self, **kwargs)
+
+    def update(self, **kwargs: dict) -> None:
+        super().update(self, **kwargs)
 
 
 class CohortProject(BaseProject, Base):
@@ -217,7 +220,7 @@ class CohortProject(BaseProject, Base):
     def __init__(self, **kwargs):
         """
         """
-        super().__init__()
+        super().__init__(**kwargs)
         [setattr(self, key, value) for key, value in kwargs.items()]
 
         required_keys = {'start_date', 'end_date'}
@@ -226,6 +229,9 @@ class CohortProject(BaseProject, Base):
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
         super().insert_project_at_correct_node(self, **kwargs)
+
+    def update(self, **kwargs: dict) -> None:
+        super().update(self, **kwargs)
 
 
 class StudentProject(BaseModel, Base):

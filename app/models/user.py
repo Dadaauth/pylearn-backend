@@ -103,7 +103,7 @@ class Admin(User, Base):
         super().__init__(**kwargs)
 
 
-class MentorCohort(Base):
+class MentorCohort(BaseModel, Base):
     """
     Association table for many-to-many relationship between mentors and cohorts.
     Attributes:
@@ -117,6 +117,21 @@ class MentorCohort(Base):
 
     mentor = relationship("Mentor", back_populates="cohorts")
     cohort = relationship("Cohort", back_populates="mentors")
+
+    def __init__(self, **kwargs):
+        """
+        Initialize a new User instance with the given keyword arguments.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments passed to the superclass initializer.
+        """
+        super().__init__()
+        [setattr(self, key, value) for key, value in kwargs.items()]
+
+        required_keys = {'mentor_id', 'cohort_id'}
+        accurate, missing = has_required_keys(kwargs, required_keys)
+        if not accurate:
+            raise ValueError(f"Missing required keys: {', '.join(missing)}")
 
 
 class Mentor(User, Base):

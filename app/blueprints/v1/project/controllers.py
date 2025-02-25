@@ -16,8 +16,8 @@ def grade_student_project():
 @jwt_required()
 @mentor_required
 @handle_endpoint_exceptions
-def retrieve_projects_with_submissions():
-    projects = iretrieve_projects_with_submissions()
+def retrieve_projects_with_submissions(cohort_id):
+    projects = iretrieve_projects_with_submissions(cohort_id)
     return format_json_responses(data={"projects": projects})
 
 @jwt_required()

@@ -211,6 +211,8 @@ class CohortProject(BaseProject, Base):
 
     start_date = mapped_column(DateTime, nullable=False)
     end_date = mapped_column(DateTime, nullable=False)
+    status = mapped_column(ENUM("released", "second-attempt", "completed"), default="released", nullable=False)
+    cohort_id = mapped_column(ForeignKey("cohorts.id"), nullable=False)
     next_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
     prev_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
 
@@ -223,7 +225,7 @@ class CohortProject(BaseProject, Base):
         super().__init__(**kwargs)
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'start_date', 'end_date'}
+        required_keys = {'start_date', 'end_date', 'cohort_id', 'status'}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
@@ -240,9 +242,10 @@ class StudentProject(BaseModel, Base):
         UniqueConstraint('student_id', 'cohort_project_id', name='unique_student_id__cohort_project_id'),
     )
 
+    cohort_id = mapped_column(ForeignKey("cohorts.id"), nullable=False)
     student_id = mapped_column(ForeignKey("students.id"), nullable=False)
     cohort_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=False)
-    status = mapped_column(ENUM("released", "submitted", "graded", "verified"), default="released", nullable=False)
+    status = mapped_column(ENUM("submitted", "graded", "verified"), default="released", nullable=False)
     submission_file = mapped_column(String(300))
     submitted_on = mapped_column(DateTime)
     assigned_to = mapped_column(ForeignKey("mentors.id"))

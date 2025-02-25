@@ -28,24 +28,23 @@ def igrade_student_project():
     studentProject.feedback = data.get('feedback')
     studentProject.save()
 
-def iretrieve_projects_with_submissions():
-    submissions = StudentProject.search(status="submitted")
-    if not submissions:
-        raise NotFound("No Submitted Projects Found")
-
-    """Check how many projects were found"""
-    if isinstance(submissions, StudentProject):
-        submissions = [submissions]
+def iretrieve_projects_with_submissions(cohort_id):
+    submissions = StudentProject.search(cohort_id=cohort_id, status="submitted")
 
     projects_with_submissions = []
     projects_with_submissions_registry = []
-    for submission in submissions:
-        if submission.project_id in projects_with_submissions_registry:
-            continue
-        project = AdminProject.search(id=submission.project_id)
-        if not project: continue
-        projects_with_submissions_registry.append(project.id)
-        projects_with_submissions.append(project.to_dict())
+
+    if submissions:
+        if isinstance(submissions, StudentProject):
+            submissions = [submissions]
+
+        for submission in submissions:
+            if submission.cohort_project_id in projects_with_submissions_registry:
+                continue
+            project = CohortProject.search(id=submission.cohort_project_id)
+            if not project: continue
+            projects_with_submissions_registry.append(project.id)
+            projects_with_submissions.append(project.to_dict())
 
     return projects_with_submissions
 

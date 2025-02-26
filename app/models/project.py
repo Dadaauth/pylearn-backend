@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Integer, String, ForeignKey, Text, UniqueConstraint, Float
+from sqlalchemy import DateTime, Date, Integer, String, ForeignKey, Text, UniqueConstraint, Float
 from sqlalchemy.dialects.mysql import LONGTEXT, ENUM
 from sqlalchemy.orm import mapped_column, relationship
 
@@ -179,7 +179,9 @@ class AdminProject(BaseProject, Base):
 
     status = mapped_column(ENUM("deleted", "draft", "published"), default="published", nullable=False)
     # How many days the project will last
-    duration_in_days = mapped_column(Integer, nullable=False)
+    # first attempt duration and second attempt duration
+    fa_duration = mapped_column(Integer, nullable=False)
+    sa_duration = mapped_column(Integer, nullable=False)
     # How long after the previous project should this project be released?
     # 0 means immediately
     release_range = mapped_column(Integer, nullable=False)
@@ -195,7 +197,7 @@ class AdminProject(BaseProject, Base):
         super().__init__(**kwargs)
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'status', 'duration_in_days', 'release_range'}
+        required_keys = {'status', 'fa_duration', 'sa_duration', 'release_range'}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
@@ -209,10 +211,14 @@ class AdminProject(BaseProject, Base):
 class CohortProject(BaseProject, Base):
     __tablename__ = "cohort_projects"
 
-    start_date = mapped_column(DateTime, nullable=False)
-    end_date = mapped_column(DateTime, nullable=False)
+    # first attempt and second attempt start date
+    fa_start_date = mapped_column(Date, nullable=False)
+    sa_start_date = mapped_column(Date, nullable=False)
+    end_date = mapped_column(Date, nullable=False)
     status = mapped_column(ENUM("released", "second-attempt", "completed"), default="released", nullable=False)
     cohort_id = mapped_column(ForeignKey("cohorts.id"), nullable=False)
+    # ID of the project in the AdminProject table
+    project_pool_id = mapped_column(ForeignKey("admin_projects.id"), nullable=False)
     next_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
     prev_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=True)
 
@@ -225,7 +231,7 @@ class CohortProject(BaseProject, Base):
         super().__init__(**kwargs)
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {'start_date', 'end_date', 'cohort_id', 'status'}
+        required_keys = {'project_pool_id', 'fa_start_date', 'sa_start_date', 'end_date', 'cohort_id', 'status'}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

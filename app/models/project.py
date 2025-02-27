@@ -32,7 +32,7 @@ class BaseProject(BaseModel):
     @classmethod    
     def insert_project_at_correct_node(cls, project, **kwargs):
         # insert Project at the correct node
-        if cls.search() is None:
+        if cls.search(course_id=kwargs["course_id"]) is None:
             # list is empty therefore insert as head of the list
             project.prev_project_id = None
             project.next_project_id = None
@@ -41,7 +41,7 @@ class BaseProject(BaseModel):
 
         prev_project_id = kwargs.get("prev_project_id")
         if not prev_project_id:
-            head_project = cls.search(prev_project_id=None)
+            head_project = cls.search(course_id=kwargs["course_id"], prev_project_id=None)
         
         project.save()
         project.refresh()
@@ -114,7 +114,7 @@ class BaseProject(BaseModel):
             next_project = cls.search(id=project.next_project_id)
             prev_project = cls.search(id=project.prev_project_id)
             new_prev_project = cls.search(id=kwargs.get("prev_project_id"))
-            head_project = cls.search(prev_project_id=None)
+            head_project = cls.search(course_id=project.course_id, prev_project_id=None)
 
             # Detach connection from previous spot
             if next_project:

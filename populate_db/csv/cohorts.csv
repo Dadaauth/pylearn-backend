@@ -1,0 +1,16 @@
+id,name,status,course_id
+6e0666f2-2f3a-44db-83a3-e0ef7a78e3b1,Cohort-1,completed,e3b29e0d-86e2-4322-a3b0-0c63796597bb
+fa8e15c7-a465-4651-835a-fe1e19b20974,Cohort-2,completed,e3b29e0d-86e2-4322-a3b0-0c63796597bb
+216ed8e2-fe84-4430-97ea-ad8e40b066d5,Cohort-3,in-progress,e3b29e0d-86e2-4322-a3b0-0c63796597bb
+7973ee83-568d-4bee-ae75-03b369696f01,Cohort-4,in-progress,e3b29e0d-86e2-4322-a3b0-0c63796597bb
+cb2e1d53-97d2-4a71-ad5a-138119f5c7b4,Cohort-5,pending,e3b29e0d-86e2-4322-a3b0-0c63796597bb
+5e6a3583-71e8-4da3-9831-66f1d2977de4,Cohort-1,completed,0480356f-21b7-4f30-b558-b9b41ad7b0c2
+ec05b23e-1296-4def-ae03-4834684bdd05,Cohort-2,completed,0480356f-21b7-4f30-b558-b9b41ad7b0c2
+5b29052d-97c9-400c-89ba-0f90279b21a5,Cohort-3,in-progress,0480356f-21b7-4f30-b558-b9b41ad7b0c2
+03c45901-0931-4d1a-b72a-e426ec59a515,Cohort-4,in-progress,0480356f-21b7-4f30-b558-b9b41ad7b0c2
+a9596d53-5fe4-496f-8ead-cc84471b401e,Cohort-5,pending,0480356f-21b7-4f30-b558-b9b41ad7b0c2
+ef2b893c-969a-4a02-8c53-89b25e77d79d,Cohort-1,completed,f5ba003f-350d-4f4c-923f-0ea9c86860c3
+b859c662-a65e-40e8-b7de-446c2b0d273e,Cohort-2,completed,f5ba003f-350d-4f4c-923f-0ea9c86860c3
+bbfb5b01-e233-4493-83b8-f672bdb2f1aa,Cohort-3,in-progress,f5ba003f-350d-4f4c-923f-0ea9c86860c3
+525a4f8f-d8ec-40da-b32c-d85a143c69c3,Cohort-4,in-progress,f5ba003f-350d-4f4c-923f-0ea9c86860c3
+0dac1412-6ed3-4b62-87d5-3a3b5025bcd8,Cohort-5,pending,f5ba003f-350d-4f4c-923f-0ea9c86860c3

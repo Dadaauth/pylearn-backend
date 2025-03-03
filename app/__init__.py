@@ -40,6 +40,7 @@ def create_app(environment="development"):
     def create_session():
         # Load a new Storage object
         g.db_storage = DBStorage()
+        g.db_storage.load()
 
     @app.teardown_request
     def remove_session(exception=None):

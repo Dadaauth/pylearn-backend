@@ -54,7 +54,7 @@ class DBStorage:
         else:
             raise Exception("SafeGuard: Do not try to drop tables randomly in production!!!!")
 
-    def load_session(self) -> None:
+    def load_session(self):
         return self.__Session()
 
     def close(self) -> None:

@@ -130,42 +130,6 @@ def ifetch_projects_for_cohort(course_id):
         p_list = [projects.to_dict()]
     return p_list
 
-def ifetch_projects_for_admin(course_id):
-    module_id = extract_request_data("args").get('module_id')
-
-    if module_id:
-        projects = AdminProject.search(module_id=module_id)
-    else:
-        projects = AdminProject.search(course_id=course_id)
-
-    p_list = []
-
-    if not projects or projects is None:
-        raise NotFound("No projects found")
-
-    if isinstance(projects, list):
-        for project in projects:
-            p_list.append(project.to_dict())
-    elif isinstance(projects, AdminProject):
-        p_list = [projects.to_dict()]
-    return p_list
-
-def create_new_project():
-    data = extract_request_data("json")
-
-    if not data.get("course_id"):
-        raise BadRequest("Missing required field: course_id")
-
-    if not Course.search(id=data.get("course_id")):
-        raise BadRequest(f"Course with ID: {data.get("course_id")} not found!")
-
-    status = "draft"
-    if data.get("mode") == "publish": status = "published"
-    data["author_id"] = get_jwt_identity()["id"]
-    data["status"] = status
-    
-    AdminProject(**data).save()
-
 def update_single_project_details(project_id):
     data = extract_request_data("json")
     project = AdminProject.search(id=project_id)

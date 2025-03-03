@@ -38,16 +38,17 @@ def create_app(environment="development"):
     
     @app.before_request
     def create_session():
-        # Load a new Session object
-        storage.load()
+        # Load a new Storage object
         g.db_storage = storage
+        g.db_session = storage.load_session()
 
     @app.teardown_request
     def remove_session(exception=None):
         if hasattr(g, 'db_storage'):
             # Close the session and remove
             # Session from scoped_session
-            g.db_storage.close()
+            # remember to lose other resources like engine
+            g.db_session.close()
 
     register_blueprints(app)
     return app

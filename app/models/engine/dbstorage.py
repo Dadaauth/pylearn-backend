@@ -1,6 +1,7 @@
 """MODULE Documentation"""
 import os
 
+from flask import g
 from sqlalchemy import create_engine, or_, select
 from sqlalchemy.orm import sessionmaker, scoped_session
 
@@ -28,7 +29,6 @@ class DBStorage:
     """CLASS Documentation here"""
     
     __engine = None
-    __session = None
     __Session = None
 
     def __init__(self) -> None:
@@ -46,14 +46,14 @@ class DBStorage:
             !!!!!!!!!
         """
         if self.testing:
-            if self.__session.is_active:
-                self.__session.close()
+            if g.db_session.is_active:
+                g.db_session.close()
             Base.metadata.drop_all(self.__engine)
         else:
             raise Exception("SafeGuard: Do not try to drop tables randomly in production!!!!")
 
-    def load(self) -> None:
-        self.__session = self.__Session()
+    def load_session(self) -> None:
+        return self.__Session()
 
     def close(self) -> None:
         """
@@ -64,29 +64,29 @@ class DBStorage:
 
     def new(self, obj):
         try:
-            self.__session.add(obj)
+            g.db_session.add(obj)
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            if self.__session.is_active:
-                self.__session.rollback()
+            if g.db_session.is_active:
+                g.db_session.rollback()
             return False
 
     def delete(self, obj):
         try:
-            self.__session.delete(obj)
+            g.db_session.delete(obj)
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            if self.__session.is_active:
-                self.__session.rollback()
+            if g.db_session.is_active:
+                g.db_session.rollback()
             return False
 
     def all(self, cls):
         try:
-            return [obj for obj in self.__session.scalars(select(cls)).all()]
+            return [obj for obj in g.db_session.scalars(select(cls)).all()]
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            if self.__session.is_active:
-                self.__session.rollback()
+            if g.db_session.is_active:
+                g.db_session.rollback()
             return []
     
     def count(self, cls, **filters):
@@ -101,11 +101,11 @@ class DBStorage:
                 else:
                     conditions.append(field == value)
 
-            return self.__session.query(cls).filter(*conditions).count()
+            return g.db_session.query(cls).filter(*conditions).count()
         except Exception as e:
             print("Exception Occured When working with DataBase", e)
-            if self.__session.is_active:
-                self.__session.rollback()
+            if g.db_session.is_active:
+                g.db_session.rollback()
             return False
     
     def search(self, cls, **filters):
@@ -119,20 +119,20 @@ class DBStorage:
                     conditions.append(or_(*[field == v for v in value]))
                 else:
                     conditions.append(field == value)
-            sh =  [obj for obj in self.__session.scalars(select(cls).filter(*conditions))]
+            sh =  [obj for obj in g.db_session.scalars(select(cls).filter(*conditions))]
             return sh[0] if len(sh) == 1 else sh if len(sh) > 1 else None
         except Exception as e:
             return None
 
     def save(self) -> None:
         try:
-            self.__session.commit()
+            g.db_session.commit()
             return True
         except Exception as e:
             print("Exception Occured When Saving To DataBase", e)
-            if self.__session.is_active:
-                self.__session.rollback()
+            if g.db_session.is_active:
+                g.db_session.rollback()
             return False
 
     def refresh(self, obj) -> None:
-        self.__session.refresh(obj)
+        g.db_session.refresh(obj)

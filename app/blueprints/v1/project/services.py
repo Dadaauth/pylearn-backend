@@ -20,11 +20,24 @@ def igrade_student_project():
     studentProject = StudentProject.search(id=data.get("student_project_id"))
     if not studentProject:
         raise NotFound("Student's project not found")
-    
+
+    cohortProject = CohortProject.search(id=studentProject.cohort_project_id)
+    if not cohortProject: return
+
+    grade = data.get("grade")
+    submissionDate = studentProject.submitted_on.date()
+    if submissionDate >= cohortProject.sa_start_date \
+        and submissionDate < cohortProject.end_date:
+        # give the student a 65% grade
+        grade = data.get("grade") * 0.65
+    if submissionDate >= cohortProject.end_date:
+        # give the student a 50% grade
+        grade = data.get("grade") * 0.5
+
     studentProject.status = "graded"
     studentProject.graded_on = datetime.now(timezone.utc)
     studentProject.graded_by = mentor_id
-    studentProject.grade = data.get("grade")
+    studentProject.grade = grade
     studentProject.feedback = data.get('feedback')
     studentProject.save()
 

@@ -23,7 +23,7 @@ def create_app(environment="development"):
 
     from app.blueprints import register_blueprints
     from app.models.user import Admin, Mentor, Student
-    from app.models.engine.dbstorage import DBStorage
+    from app.models import storage
     
     @jwt.user_lookup_loader
     def user_loader_callback(_jwt_header, jwt_data):
@@ -39,8 +39,8 @@ def create_app(environment="development"):
     @app.before_request
     def create_session():
         # Load a new Storage object
-        g.db_storage = DBStorage()
-        g.db_storage.load()
+        g.db_storage = storage
+        g.db_session = storage.load_session()
 
     @app.teardown_request
     def remove_session(exception=None):
@@ -48,7 +48,7 @@ def create_app(environment="development"):
             # Close the session and remove
             # Session from scoped_session
             # remember to lose other resources like engine
-            g.db_storage.close()
+            g.db_session.close()
 
     register_blueprints(app)
     return app

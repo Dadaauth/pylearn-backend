@@ -20,6 +20,25 @@ Then run:
 python run.py
 ```
 
-
 Install RabbitMQ on the target machine
 Install Celery on the target machine. If possible install as a system-wide package
+
+## Celery Setup
+
+Celery is our job or task management tool. It is needed to schedule email deliveries, schedule project releases for cohorts and so much more.
+
+Installation in a virtual environment:
+
+```shell
+pip install -U celery
+```
+
+Make sure celery beat runs as a background process and is restarted automatically in the case of a crash or system reboot
+
+* **!Important!** See Celery and Celery Beat Setup README.md Documentation: [here](/jobs/README.md)
+
+## RabbitMQ Setup
+
+* Install RabbitMQ on ubuntu using the script [install_rabbit_mq_ubuntu](/install_rabbit_mq_ubuntu.sh) provided in the root of the repo. For other platforms see [Downloading and Installing RabbitMQ](https://www.rabbitmq.com/download.html)
+
+* Setup RabbitMQ for Celery using this guide [Celery RabbitMQ Guide](https://docs.celeryq.dev/en/main/getting-started/backends-and-brokers/rabbitmq.html)

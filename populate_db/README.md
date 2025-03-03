@@ -6,4 +6,4 @@ make sure to create your project database before running this module
 
 run pip install -r before running the database population script
 
-CohortProject and StudentProject record will not be generated
+AdminProject, CohortProject and StudentProject record will not be generated

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from flask_jwt_extended import get_jwt_identity
 from app.utils.helpers import extract_request_data, retrieve_models_info
 from app.utils.error_extensions import BadRequest, NotFound
@@ -53,6 +55,7 @@ def submit_project(project_id, data):
     student = Student.search(id=get_jwt_identity()['id'])
     data["cohort_id"] = student.cohort_id
     data["status"] = "submitted"
+    data["submitted_on"] = datetime.now(timezone.utc)
     data["student_id"] = student.id
     data["cohort_project_id"] = project_id
     StudentProject(**data).save()

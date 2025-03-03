@@ -16,7 +16,6 @@ from cohorts import populate_cohorts
 from students import populate_students
 from mentors import populate_mentors
 from modules import populate_modules
-from admin_projects import populate_admin_projects
 
 app = create_app()
 
@@ -46,5 +45,3 @@ with app.app_context():
     populate_mentors(COHORTS_CSV_FILE, MENTORS_CSV_FILE)
     print()
     populate_modules(COURSES_CSV_FILE, MODULES_CSV_FILE)
-    print()
-    populate_admin_projects(MODULES_CSV_FILE, ADMINS_CSV_FILE, ADMINS_PROJECTS_CSV_FILE)

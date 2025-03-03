@@ -1,9 +1,28 @@
 from flask_jwt_extended import get_jwt_identity
 
-from app.models.user import Mentor, MentorCohort
+from app.models.user import Mentor, MentorCohort, Admin
 from app.models.course import Course
+from app.models.project import AdminProject
+from app.models.module import Module
 from app.utils.helpers import retrieve_model_info, extract_request_data
 from app.utils.error_extensions import BadRequest, NotFound, InternalServerError
+
+def get_extra_project_details(project):
+    author = Admin.search(id=project["author_id"])
+    if author:
+        project["author"] = author.to_dict()
+    return project
+
+def get_project_data(project_id):
+    if not project_id: return
+    project = AdminProject.search(id=project_id)
+    if not project: raise NotFound("Project not found")
+    project_dict = project.to_dict()
+
+    module = Module.search(id=project.module_id)
+    if module:
+        project_dict["module"] = module.to_dict()
+    return project_dict
 
 def all_mentors_data():
     mentors = Mentor.all()

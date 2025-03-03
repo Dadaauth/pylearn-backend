@@ -5,6 +5,7 @@ from flask import Flask, g
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from sqlalchemy.exc import InterfaceError
 
 def create_app(environment="development"):
     app = Flask(__name__)
@@ -44,11 +45,11 @@ def create_app(environment="development"):
 
     @app.teardown_request
     def remove_session(exception=None):
-        if hasattr(g, 'db_storage'):
-            # Close the session and remove
-            # Session from scoped_session
-            # remember to lose other resources like engine
-            g.db_session.close()
+        try:
+            if hasattr(g, 'db_storage'):
+                g.db_storage.close()
+        except InterfaceError:
+            print("Error with closing database session")
 
     register_blueprints(app)
     return app

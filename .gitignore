@@ -1,3 +1,6 @@
+# Data population csv folder
+csv/
+
 # Celery files
 celerybeat-schedule
 

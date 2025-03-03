@@ -118,11 +118,13 @@ def ifetch_current_projects():
     student = Student.search(id=student_id)
     projects = CohortProject.search(cohort_id=student.cohort_id, status=("released", "second-attempt"))
 
+    if not projects: return []
+
     if isinstance(projects, CohortProject):
         projects = [projects.to_dict()]
     elif isinstance(projects, list):
-        for project in projects:
-            project = project.to_dict()
+        projects = retrieve_models_info(projects)
+
     return projects
 
 def iretrieve_students_with_no_cohort(course_id):

@@ -5,6 +5,23 @@ from app.models.course import Course
 from app.models.cohort import Cohort
 
 
+def update_project_status(pjt: CohortProject):
+    today = date.today()
+    if pjt.sa_start_date <= today:
+        pjt.update(status='second-attempt')
+    if pjt.end_date <= today:
+        pjt.update(status='completed')
+    pjt.save()
+
+def review_projects(cohort: Cohort):
+    cohort_projects = CohortProject.search(cohort_id=cohort.id, status=('released', 'second-attempt'))
+    if not cohort_projects: return
+    
+    if isinstance(cohort_projects, CohortProject): cohort_projects = [cohort_projects]
+
+    for pjt in cohort_projects:
+        update_project_status(pjt)
+
 def get_active_cohorts():
     return Cohort.search(status="in-progress")
 

@@ -14,8 +14,7 @@ class BaseProject(BaseModel):
     description = mapped_column(String(300))
     markdown_content = mapped_column(LONGTEXT)
 
-    # Nullable, as projects with no module can be assigned under 'misc'
-    module_id = mapped_column(ForeignKey("modules.id"))
+    module_id = mapped_column(ForeignKey("modules.id"), nullable=False)
     author_id = mapped_column(ForeignKey("admins.id"), nullable=False)
     course_id = mapped_column(ForeignKey("courses.id"), nullable=False)
 
@@ -28,117 +27,6 @@ class BaseProject(BaseModel):
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
-
-    @classmethod    
-    def insert_project_at_correct_node(cls, project, **kwargs):
-        # insert Project at the correct node
-        if cls.search(course_id=kwargs["course_id"]) is None:
-            # list is empty therefore insert as head of the list
-            project.prev_project_id = None
-            project.next_project_id = None
-            project.save()
-            return
-
-        prev_project_id = kwargs.get("prev_project_id")
-        if not prev_project_id:
-            head_project = cls.search(course_id=kwargs["course_id"], prev_project_id=None)
-        
-        project.save()
-        project.refresh()
-
-        if not prev_project_id:
-            # Make first project in list
-            head_project.prev_project_id = project.id
-            head_project.save()
-
-            project.next_project_id = head_project.id
-        else:
-            prev_project = cls.search(id=prev_project_id)
-            if prev_project is None:
-                project.delete()
-                raise NotFound("Previous Project Not Found")
-
-            next_p_id = prev_project.next_project_id
-            prev_project.next_project_id = project.id
-            prev_project.save()
-            project.next_project_id = next_p_id
-
-            # Check if the next project exists
-            next_project = cls.search(id=next_p_id)
-            if next_project:
-                next_project.prev_project_id = project.id
-                next_project.save()
-
-        project.save()
-    
-    @classmethod
-    def all(cls):
-        """
-        You need to intercept here because you need
-            to sort the projects before you send them
-            to the client calling the models API
-        """
-        projects = super().all()
-        return cls.sort_projects(projects)
-
-    @classmethod
-    def search(cls, **filters: dict) -> list:
-        """
-        You need to intercept here because you need
-            to sort the projects before you send them
-            to the client calling the models API
-        """
-        projects = super().search(**filters)
-        return cls.sort_projects(projects)
-    
-    @classmethod
-    def update(cls, project, **kwargs: dict) -> None:
-        """
-            You need to intercept here to account for
-            updates involving the arrangement of nodes
-            in the linked list of projects
-
-            Update a set of attributes in an object.
-            :params
-                @kwargs: a dictionary of attributes
-                        to update
-        """
-        # update to project ordering
-        if project.prev_project_id != kwargs.get("prev_project_id"):
-            """
-                Code for if the client is trying
-                to update the order of the projects
-                in the linked list.
-
-            """
-            next_project = cls.search(id=project.next_project_id)
-            prev_project = cls.search(id=project.prev_project_id)
-            new_prev_project = cls.search(id=kwargs.get("prev_project_id"))
-            head_project = cls.search(course_id=project.course_id, prev_project_id=None)
-
-            # Detach connection from previous spot
-            if next_project:
-                next_project.prev_project_id = project.prev_project_id
-            if prev_project:
-                prev_project.next_project_id = project.next_project_id
-
-            project.prev_project_id = None
-            project.next_project_id = None
-
-            # Add project to new spot in the list
-            if new_prev_project:
-                project.prev_project_id = new_prev_project.id
-                project.next_project_id = new_prev_project.next_project_id
-
-                if new_prev_project.next_project:
-                    new_prev_project.next_project.prev_project_id = project.id
-
-                new_prev_project.next_project_id = project.id
-            elif new_prev_project is None and head_project:
-                project.next_project_id = head_project.id
-                head_project.prev_project_id = project.id
-
-        super().update(project, **kwargs)
 
     def sort_projects(projects):
         if projects is None or projects == []: return projects
@@ -202,11 +90,96 @@ class AdminProject(BaseProject, Base):
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
-        super().insert_project_at_correct_node(self, **kwargs)
+        self.insert_project_at_correct_node(**kwargs)
+
+    def insert_project_at_correct_node(self, **kwargs):
+        # insert Project at the correct node
+        if AdminProject.search(course_id=kwargs["course_id"]) is None:
+            # list is empty therefore insert as head of the list
+            self.prev_project_id = None
+            self.next_project_id = None
+            self.save()
+            return
+
+        prev_project_id = kwargs.get("prev_project_id")
+        if not prev_project_id:
+            head_project = AdminProject.search(course_id=kwargs["course_id"], prev_project_id=None)
+        
+        self.save()
+        self.refresh()
+
+        if not prev_project_id:
+            # Make first project in list
+            head_project.prev_project_id = self.id
+            head_project.save()
+
+            self.next_project_id = head_project.id
+        else:
+            prev_project = AdminProject.search(id=prev_project_id)
+            if prev_project is None:
+                self.delete()
+                raise NotFound("Previous Project Not Found")
+
+            next_p_id = prev_project.next_project_id
+            prev_project.next_project_id = self.id
+            prev_project.save()
+            self.next_project_id = next_p_id
+
+            # Check if the next project exists
+            next_project = AdminProject.search(id=next_p_id)
+            if next_project:
+                next_project.prev_project_id = self.id
+                next_project.save()
+
+        self.save()
 
     def update(self, **kwargs: dict) -> None:
-        super().update(self, **kwargs)
+        """
+            You need to intercept here to account for
+            updates involving the arrangement of nodes
+            in the linked list of projects
 
+            Update a set of attributes in an object.
+            :params
+                @kwargs: a dictionary of attributes
+                        to update
+        """
+        # update to project ordering
+        if self.prev_project_id != kwargs.get("prev_project_id"):
+            """
+                Code for if the client is trying
+                to update the order of the projects
+                in the linked list.
+
+            """
+            next_project = AdminProject.search(id=self.next_project_id)
+            prev_project = AdminProject.search(id=self.prev_project_id)
+            new_prev_project = AdminProject.search(id=kwargs.get("prev_project_id"))
+            head_project = AdminProject.search(course_id=self.course_id, prev_project_id=None)
+
+            # Detach connection from previous spot
+            if next_project:
+                next_project.prev_project_id = self.prev_project_id
+            if prev_project:
+                prev_project.next_project_id = self.next_project_id
+
+            self.prev_project_id = None
+            self.next_project_id = None
+
+            # Add project to new spot in the list
+            if new_prev_project:
+                self.prev_project_id = new_prev_project.id
+                self.next_project_id = new_prev_project.next_project_id
+
+                if new_prev_project.next_project:
+                    new_prev_project.next_project.prev_project_id = self.id
+
+                new_prev_project.next_project_id = self.id
+            elif new_prev_project is None and head_project:
+                self.next_project_id = head_project.id
+                head_project.prev_project_id = self.id
+
+        super().update(**kwargs)
 
 class CohortProject(BaseProject, Base):
     __tablename__ = "cohort_projects"
@@ -236,10 +209,96 @@ class CohortProject(BaseProject, Base):
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
         
-        super().insert_project_at_correct_node(self, **kwargs)
+        self.insert_project_at_correct_node(**kwargs)
+
+    def insert_project_at_correct_node(self, **kwargs):
+        # insert Project at the correct node
+        if CohortProject.search(cohort_id=kwargs["cohort_id"]) is None:
+            # list is empty therefore insert as head of the list
+            self.prev_project_id = None
+            self.next_project_id = None
+            self.save()
+            return
+
+        prev_project_id = kwargs.get("prev_project_id")
+        if not prev_project_id:
+            head_project = CohortProject.search(cohort_id=kwargs["cohort_id"], prev_project_id=None)
+        
+        self.save()
+        self.refresh()
+
+        if not prev_project_id:
+            # Make first project in list
+            head_project.prev_project_id = self.id
+            head_project.save()
+
+            self.next_project_id = head_project.id
+        else:
+            prev_project = CohortProject.search(id=prev_project_id)
+            if prev_project is None:
+                self.delete()
+                raise NotFound("Previous Project Not Found")
+
+            next_p_id = prev_project.next_project_id
+            prev_project.next_project_id = self.id
+            prev_project.save()
+            self.next_project_id = next_p_id
+
+            # Check if the next project exists
+            next_project = CohortProject.search(id=next_p_id)
+            if next_project:
+                next_project.prev_project_id = self.id
+                next_project.save()
+
+        self.save()
 
     def update(self, **kwargs: dict) -> None:
-        super().update(self, **kwargs)
+        """
+            You need to intercept here to account for
+            updates involving the arrangement of nodes
+            in the linked list of projects
+
+            Update a set of attributes in an object.
+            :params
+                @kwargs: a dictionary of attributes
+                        to update
+        """
+        # update to project ordering
+        if self.prev_project_id != kwargs.get("prev_project_id"):
+            """
+                Code for if the client is trying
+                to update the order of the projects
+                in the linked list.
+
+            """
+            next_project = CohortProject.search(id=self.next_project_id)
+            prev_project = CohortProject.search(id=self.prev_project_id)
+            new_prev_project = CohortProject.search(id=kwargs.get("prev_project_id"))
+            head_project = CohortProject.search(cohort_id=self.cohort_id, prev_project_id=None)
+
+            # Detach connection from previous spot
+            if next_project:
+                next_project.prev_project_id = self.prev_project_id
+            if prev_project:
+                prev_project.next_project_id = self.next_project_id
+
+            self.prev_project_id = None
+            self.next_project_id = None
+
+            # Add project to new spot in the list
+            if new_prev_project:
+                self.prev_project_id = new_prev_project.id
+                self.next_project_id = new_prev_project.next_project_id
+
+                if new_prev_project.next_project:
+                    new_prev_project.next_project.prev_project_id = self.id
+
+                new_prev_project.next_project_id = self.id
+            elif new_prev_project is None and head_project:
+                self.next_project_id = head_project.id
+                head_project.prev_project_id = self.id
+
+        super().update(**kwargs)
 
 
 class StudentProject(BaseModel, Base):
@@ -251,7 +310,7 @@ class StudentProject(BaseModel, Base):
     cohort_id = mapped_column(ForeignKey("cohorts.id"), nullable=False)
     student_id = mapped_column(ForeignKey("students.id"), nullable=False)
     cohort_project_id = mapped_column(ForeignKey("cohort_projects.id"), nullable=False)
-    status = mapped_column(ENUM("submitted", "graded", "verified"), default="released", nullable=False)
+    status = mapped_column(ENUM("submitted", "graded", "verified"), default="submitted", nullable=False)
     submission_file = mapped_column(String(300))
     submitted_on = mapped_column(DateTime)
     assigned_to = mapped_column(ForeignKey("mentors.id"))
@@ -266,7 +325,7 @@ class StudentProject(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {"student_id", "cohort_project_id"}
+        required_keys = {"status", "cohort_id", "student_id", "cohort_project_id"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

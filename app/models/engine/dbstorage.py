@@ -34,7 +34,9 @@ class DBStorage:
     def __init__(self) -> None:
         self.testing = True if os.getenv("TESTING") == "True" else False
         self.__engine = create_engine(TEST_DB_CONNECTION_STRING if
-                                      self.testing else DB_CONNECTION_STRING, pool_recycle=3600, pool_pre_ping=True)
+                                      self.testing else DB_CONNECTION_STRING,
+                                      pool_recycle=3600, pool_pre_ping=True,
+                                      pool_size=20, max_overflow=40)
         Base.metadata.create_all(self.__engine)
         session = sessionmaker(bind=self.__engine)
         self.__Session = scoped_session(session)
@@ -60,6 +62,7 @@ class DBStorage:
             Closes the session object and removes Session from scoped_session::
                 The connection to the database is hereby closed
         """
+        g.db_session.close()
         self.__Session.remove()
 
     def new(self, obj):

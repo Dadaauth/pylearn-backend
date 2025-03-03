@@ -93,6 +93,7 @@ def count_completed_modules():
         return {"completed": 0, "all": 0}
     for module in all_modules:
         projects = AdminProject.search(module_id=module.id)
+        if isinstance(projects, AdminProject): projects = [projects]
         projects_count = len(projects) if projects else 0
         projects_released = CohortProject.search()
 

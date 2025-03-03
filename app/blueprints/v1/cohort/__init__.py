@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from .controllers import create_cohort, get_cohort, get_cohort_students, ud_cohort
-from .controllers import assign_mentor_to_cohorts, remove_mentor_from_cohorts, get_all_cohorts
+from .controllers import get_all_cohorts
 from .controllers import add_students_to_cohort
 
 cohort_bp = Blueprint('cohort', __name__)

@@ -50,6 +50,25 @@ def has_required_keys(dictionary: dict, required_keys: set):
         return False, list(missing_keys)
     return True, None
 
+def retrieve_models_info(objects: list, fields: list = None) -> list[dict]:
+    """
+        Retrieve information from a list of model objects.
+        Args:
+            objects (list): A list of model objects to retrieve information from.
+            fields (list, optional): A list of specific fields to retrieve from each model. 
+                                    If not provided, all fields will be retrieved.
+        Returns:
+            list[dict]: A list of dictionaries containing the retrieved information from each model.
+    """
+    infos = []
+    for model in objects:
+        if fields:
+            info = retrieve_model_info(model, fields)
+        else:
+            info = model.to_dict()
+        infos.append(info)
+    return infos
+
 def retrieve_model_info(obj: object, fields: list) -> dict:
     """
     Retrieves specified fields from an object and returns them as a dictionary.

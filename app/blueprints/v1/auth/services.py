@@ -52,9 +52,6 @@ def user_login(credentials):
         cohort = Cohort.search(id=user.cohort_id)
         if not cohort:
             raise BadRequest("Student not assigned to cohort")
-        
-    if user.status != "active":
-        raise BadRequest("User account is not yet active")
 
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
     refresh_token = create_refresh_token(identity={"id": user.id, "role": credentials.get("role")})

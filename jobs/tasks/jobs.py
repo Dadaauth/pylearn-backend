@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import date
 
 import requests
 
@@ -9,6 +10,26 @@ from jobs.celery import app
 from jobs.tasks.utils.utils import release_projects_recursively
 from jobs.tasks.utils.utils import get_active_cohorts, review_projects
 from jobs.tasks.utils.utils import notify_students_of_released_projects
+from jobs.tasks.utils.utils import get_pending_cohorts
+
+
+@app.task(name="start-cohorts")
+def start_cohorts():
+    # change cohorts status when
+    # their start dates is reached
+    flask_app = create_app()
+    with flask_app.app_context():
+        g.db_storage = storage
+        g.db_session = storage.load_session()
+
+        cohorts = get_pending_cohorts()
+        for cohort in cohorts:
+            if cohort.start_date < date.today(): continue
+            cohort.status = "in-progress"
+            cohort.save()
+            cohort.refresh()
+            released_projects = release_projects_recursively(cohort)
+            notify_students_of_released_projects(released_projects, cohort)
 
 
 @app.task(name="review-ongoing-projects")
@@ -20,7 +41,6 @@ def review_ongoing_projects():
         g.db_session = storage.load_session()
 
         cohorts = get_active_cohorts()
-        if not cohorts: return
 
         for cohort in cohorts:
             review_projects(cohort)

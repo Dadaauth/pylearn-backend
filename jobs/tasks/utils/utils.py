@@ -24,8 +24,17 @@ def review_projects(cohort: Cohort):
     for pjt in cohort_projects:
         update_project_status(pjt)
 
+def get_pending_cohorts():
+    cohorts = Cohort.search(status="pending")
+    if not cohorts: return []
+    if isinstance(cohorts, Cohort): return [cohorts]
+    return cohorts
+
 def get_active_cohorts():
-    return Cohort.search(status="in-progress")
+    cohorts = Cohort.search(status="in-progress")
+    if not cohorts: return []
+    if isinstance(cohorts, Cohort): return [cohorts]
+    return cohorts
 
 def release_first_project_for_cohort(cohort: Cohort):
     # Retrieve the first project in the course

@@ -12,6 +12,7 @@ class Course(BaseModel, Base):
 
     title = mapped_column(String(60), nullable=False)
     status = mapped_column(ENUM("deleted", "draft", "published"), default="published", nullable=False)
+    communication_channel = mapped_column(String(255), nullable=False)
 
     modules = relationship("Module", back_populates="course")
 
@@ -21,7 +22,7 @@ class Course(BaseModel, Base):
         super().__init__()
         [setattr(self, key, value) for key, value in kwargs.items()]
 
-        required_keys = {"title"}
+        required_keys = {"title", "status", "communication_channel"}
         accurate, missing = has_required_keys(kwargs, required_keys)
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")

@@ -28,14 +28,17 @@ def generate_fake_data():
         {
             "title": "Software Engineering",
             "status": "published",
+            "communication_channel": "https://discord/invite",
         },
         {
             "title": "UI/UX Design",
             "status": "published",
+            "communication_channel": "https://discord/invite",
         },
         {
             "title": "Video Editing",
             "status": "published",
+            "communication_channel": "https://discord/invite",
         }
     ]
     return fake_data
@@ -55,7 +58,7 @@ def save_data_to_csv(filename, data):
         writer = csv.writer(file)
 
         # Write header
-        writer.writerow(["id", "title", "status"])
+        writer.writerow(["id", "title", "status", "communication_channel"])
 
         for dt in data:
             # dt must be a list

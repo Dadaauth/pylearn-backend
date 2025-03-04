@@ -8,17 +8,18 @@ enable_utc = False
 
 beat_schedule = {
     'review-ongoing-projects': {
-        'task': 'jobs.tasks.jobs.review_ongoing_projects',
+        'task': 'review-ongoing-projects',
         'schedule': crontab(hour=6, minute=0),
     },
     'release-projects': {
-        'task': 'jobs.tasks.jobs.release_projects',
+        'task': 'release-projects',
         'schedule': crontab(hour=6, minute=0),
     },
 }
 
 task_routes = {
-    'jobs.tasks.jobs.review_ongoing_projects': {'queue': 'daily_run'},
-    'jobs.tasks.jobs.release_projects': {'queue': 'daily_run'},
-    'jobs.tasks.jobs.send_email': {'queue': 'mailing_service'},
+    'review-ongoing-projects': {'queue': 'daily_run'},
+    'release-projects': {'queue': 'daily_run'},
+    'send-transactional-email': {'queue': 'mailing_service'},
+    'send-batch-transactional-email': {'queue': 'mailing_service'},
 },

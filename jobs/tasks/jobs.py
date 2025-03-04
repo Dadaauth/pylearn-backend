@@ -8,6 +8,7 @@ from app.models import storage
 from jobs.celery import app
 from jobs.tasks.utils.utils import release_projects_recursively
 from jobs.tasks.utils.utils import get_active_cohorts, review_projects
+from jobs.tasks.utils.utils import notify_students_of_released_projects
 
 
 @app.task(name="review-ongoing-projects")
@@ -35,9 +36,8 @@ def release_projects():
         if not cohorts: return
 
         for cohort in cohorts:
-            release_projects_recursively(cohort)
-            # a send_email task can be called here to
-            # notify students of their released projects
+            released_projects = release_projects_recursively(cohort)
+            notify_students_of_released_projects(released_projects, cohort)
 
 @app.task(name="send-transactional-email")
 def send_transactional_email(subject, htmlBody, receipient_email):

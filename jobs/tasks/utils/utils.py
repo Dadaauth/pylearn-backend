@@ -5,7 +5,6 @@ from app.models.project import AdminProject, CohortProject
 from app.models.user import Student
 from app.models.course import Course
 from app.models.cohort import Cohort
-from jobs.tasks.jobs import send_batch_transactional_email
 
 
 def update_project_status(pjt: CohortProject):
@@ -99,6 +98,8 @@ def release_project_for_cohort(project: AdminProject, cohort: Cohort):
     return project_dict
 
 def notify_students_of_released_projects(released_projects, cohort):
+    from jobs.tasks.jobs import send_batch_transactional_email
+
     students = Student.search(cohort_id=cohort.id)
     if not students: return
     if isinstance(students, Student): students = [students]

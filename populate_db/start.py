@@ -31,8 +31,8 @@ COHORT_PROJECTS_CSV_FILE = "populate_db/csv/cohort_projects.csv"
 os.makedirs("populate_db/csv", exist_ok=True)
 
 with app.app_context():
-    storage.load()
     g.db_storage = storage
+    g.db_session = storage.load_session()
     
     populate_admins(ADMINS_CSV_FILE)
     print()

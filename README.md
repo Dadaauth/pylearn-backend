@@ -5,14 +5,16 @@
 Fulfill the following requirements:
 
 * create a .env file at the root of the repository and add the following:
-  * DB_CONNECTION_STRING: \
-  connection string for a mysql database
-  * TEST_DB_CONNECTION_STRING: \
-  connection string for a mysql database for testing
-  * SECRET_KEY: \
-  a string of characters for encrytion operations like cookies
-  * ADMIN_REGISTRATION_PASSCODE: \
-  code required by client to send when trying to register an account as an admin
+  * DB_CONNECTION_STRING: connection string for a mysql database
+  * TEST_DB_CONNECTION_STRING: connection string for a mysql database for testing
+  * SECRET_KEY: a string of characters for encrytion operations like cookies
+  * ADMIN_REGISTRATION_PASSCODE: code required by client to send when trying to register an account as an admin
+  * APPLICATION_NAME
+  * ZOHO_NOREPLY_EMAIL
+  * ZOHO_EMAIL_PASSWORD
+  * ZOHO_ZEPTOMAIL_MAIL_TOKEN
+  * SUPPORT_EMAIL
+  * WEB_DOMAIN
 
 Then run:
 

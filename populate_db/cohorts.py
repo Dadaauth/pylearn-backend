@@ -2,8 +2,8 @@
 Populate your database with new test admin users
 """
 import csv
-from uuid import uuid4
-import random
+from datetime import date, timedelta
+
 from faker import Faker
 
 from app.models.cohort import Cohort
@@ -36,27 +36,32 @@ def generate_fake_data(courses_csv_file):
             {
                 "name": "Cohort-1",
                 "status": "completed",
-                "course_id": course["id"]
+                "course_id": course["id"],
+                "start_date": date.today() - timedelta(days=365),
             },
             {
                 "name": "Cohort-2",
                 "status": "completed",
-                "course_id": course["id"]
+                "course_id": course["id"],
+                "start_date": date.today() - timedelta(days=265),
             },
             {
                 "name": "Cohort-3",
                 "status": "in-progress",
-                "course_id": course["id"]
+                "course_id": course["id"],
+                "start_date": date.today() - timedelta(days=35),
             },
             {
                 "name": "Cohort-4",
                 "status": "in-progress",
-                "course_id": course["id"]
+                "course_id": course["id"],
+                "start_date": date.today() - timedelta(days=15),
             },
             {
                 "name": "Cohort-5",
                 "status": "pending",
-                "course_id": course["id"]
+                "course_id": course["id"],
+                "start_date": date.today(),
             },
         ]
         fake_data.extend(dt)

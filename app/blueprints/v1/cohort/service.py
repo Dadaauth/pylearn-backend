@@ -9,11 +9,11 @@ from app.utils.error_extensions import BadRequest, NotFound
 
 def icreate_cohort():
     data = extract_request_data("json")
-    valid, values = has_required_keys(data, {'course_id', 'name'})
-    if not data.get("status"):
-        data["status"] = "pending"
+    valid, values = has_required_keys(data, {'course_id', 'name', 'start_date'})
     if not valid:
         raise BadRequest(f"Required keys are missing -> {values}")
+    if not data.get("status"):
+        data["status"] = "pending"
     
     Cohort(**data).save()
 

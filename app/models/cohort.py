@@ -47,8 +47,8 @@ class Cohort(BaseModel, Base):
             return
 
         self.prev_cohort_id = last_cohort.id
-        last_cohort.next_cohort_id = self.id
         self.save()
+        last_cohort.next_cohort_id = self.id
         last_cohort.save()
 
     def sort_cohorts(cohorts):

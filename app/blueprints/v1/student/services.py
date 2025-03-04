@@ -1,12 +1,15 @@
 from datetime import datetime, timezone
 
 from flask_jwt_extended import get_jwt_identity
+
 from app.utils.helpers import extract_request_data, retrieve_models_info
-from app.utils.error_extensions import BadRequest, NotFound
+from jobs.tasks.jobs import send_transactional_email
+from app.utils.error_extensions import BadRequest, NotFound, InternalServerError
 from app.models.user import Student, Admin
 from app.models.module import Module
 from app.models.project import AdminProject, CohortProject, StudentProject
 from app.models.course import Course
+from app.models.cohort import Cohort
 
 def get_course_and_cohort_id():
     student_id = get_jwt_identity()["id"]
@@ -141,6 +144,29 @@ def iretrieve_students_with_no_cohort(course_id):
             students.append(student.basic_info())
     return students
 
+def send_welcome_email_for_student(student_details):
+    course = Course.search(id=student_details["course_id"])
+    cohort = Cohort.search(id=student_details["cohort_id"])
+    discord_community = course.communication_channel
+    subject = f"Welcome to PyLearn! 🚀 Get Ready to Start Learning"
+    htmlBody = f"""
+    <h4>Hi {student_details["first_name"]},</h4>
+    <br />
+    Welcome to PyLearn! 🎉 We're excited to have you in {cohort.name} for {course.title}.
+    <br />
+    To stay updated and connect with fellow learners, join our Discord community:
+    👉 <a href="{discord_community}">Join Now</a>
+    <br />
+    Your cohort starts by ({cohort.start_date})! We’ll send you more details about next steps shortly.
+    <br />
+    Stay tuned, and get ready to learn! 🚀
+    <br />
+    The PyLearn Team <br />
+    support@authhub.tech
+    """
+    receipient_email = student_details["email"]
+    send_transactional_email.delay(subject, htmlBody, receipient_email)
+
 def student_create_new_account():
     data = extract_request_data("json")
     if not (data.get("first_name") and data.get("last_name") and data.get("email") and data.get("course_id")):
@@ -151,9 +177,18 @@ def student_create_new_account():
     
     if not Course.search(id=data.get("course_id")):
         raise BadRequest("Selected Course does not exist!")
+    
 
     student_details = {
         **data,
         "status": "inactive",
     }
+
+    last_cohort = Cohort.search(course_id=student_details["course_id"], next_cohort_id=None)
+    if not last_cohort:
+        raise InternalServerError("No Cohorts assignable to student found")
+    
+    student_details["cohort_id"] = last_cohort.id
+
     Student(**student_details).save()
+    return student_details

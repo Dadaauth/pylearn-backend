@@ -1,9 +1,11 @@
 from flask_jwt_extended import jwt_required
-from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, mentor_required, extract_request_data
+
+from app.utils.helpers import format_json_responses, handle_endpoint_exceptions, admin_required, extract_request_data
 from .services import count_completed_modules, count_completed_projects, submit_project
 from .services import iretrieve_students_with_no_cohort, student_create_new_account
 from .services import ifetch_current_projects, get_project_data, get_extra_project_details
 from .services import get_course_and_cohort_id, get_modules, append_projects_to_modules
+from .services import send_welcome_email_for_student
 
 
 @jwt_required()
@@ -42,7 +44,8 @@ def retrieve_students_with_no_cohort(course_id):
 
 @handle_endpoint_exceptions
 def new_student_registration():
-    student_create_new_account()
+    student_details = student_create_new_account()
+    send_welcome_email_for_student(student_details)
     return format_json_responses(201, message="Account created successfully.")
 
 @jwt_required()

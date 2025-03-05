@@ -44,10 +44,14 @@ def has_required_keys(dictionary: dict, required_keys: set):
         tuple: A tuple containing a boolean and a list. The boolean is True if all required keys are present, 
                otherwise False. The list contains the missing keys if any, otherwise None.
     """
-    accurate = required_keys.issubset(dictionary.keys())
-    if not accurate:
-        missing_keys = required_keys - dictionary.keys()
-        return False, list(missing_keys)
+    missing_keys = []
+    accurate = True
+    for key in required_keys:
+        if dictionary.get(key) is None:
+            accurate = False
+            missing_keys.append(key)
+
+    if not accurate: return False, missing_keys
     return True, None
 
 def retrieve_models_info(objects: list, fields: list = None) -> list[dict]:

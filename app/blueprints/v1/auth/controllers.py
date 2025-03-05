@@ -89,30 +89,32 @@ def register():
         if user_exists(data.get('email'), "mentor"):
             raise ValueError("A user with this email already exists.")
         user = create_user(data, "mentor")
-        subject = f"Welcome to PyLearn, {user["first_name"]}! Activate Your Account 🚀"
-        htmlBody = f"""
-        <b>Hi {{mentor_name}},</b>
-        <br/><br/>
-        Welcome to <b>PyLearn! 🎉</b> Your mentor account has been created by an admin, and we’re excited to have you on board.
-        <br/>
-        To get started, please activate your account by clicking the link below:
-        <br/>
-        <a href="{os.getenv("FRONTEND_URL")}/auth/account/mentor/activate">🔗 Activate Account</a>
-        <br/>
-        Or copy and paste this link in the browser: {os.getenv("FRONTEND_URL")}/auth/account/mentor/activate"
-        <br/><br/>
-        Once activated, you’ll be able to access your dashboard, connect with students, and start mentoring right away!
-        <br/>
-        If you have any questions, feel free to reach out to us.
-        <br/><br/>
-        Looking forward to an amazing journey together! 🚀
-        <br/><br/>
-        Best,<br/>
-        The PyLearn Team<br/>
-        {os.getenv("SUPPORT_EMAIL")}
-        """
-        receipient_email = user["email"]
-        send_transactional_email.delay(subject, htmlBody, receipient_email)
+
+        if os.getenv("ENVIRONMENT") != "testing":
+            subject = f"Welcome to PyLearn, {user["first_name"]}! Activate Your Account 🚀"
+            htmlBody = f"""
+            <b>Hi {{mentor_name}},</b>
+            <br/><br/>
+            Welcome to <b>PyLearn! 🎉</b> Your mentor account has been created by an admin, and we’re excited to have you on board.
+            <br/>
+            To get started, please activate your account by clicking the link below:
+            <br/>
+            <a href="{os.getenv("FRONTEND_URL")}/auth/account/mentor/activate">🔗 Activate Account</a>
+            <br/>
+            Or copy and paste this link in the browser: {os.getenv("FRONTEND_URL")}/auth/account/mentor/activate"
+            <br/><br/>
+            Once activated, you’ll be able to access your dashboard, connect with students, and start mentoring right away!
+            <br/>
+            If you have any questions, feel free to reach out to us.
+            <br/><br/>
+            Looking forward to an amazing journey together! 🚀
+            <br/><br/>
+            Best,<br/>
+            The PyLearn Team<br/>
+            {os.getenv("SUPPORT_EMAIL")}
+            """
+            receipient_email = user["email"]
+            send_transactional_email.delay(subject, htmlBody, receipient_email)
 
     return format_json_responses(201,
                                 data={

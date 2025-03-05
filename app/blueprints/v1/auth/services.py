@@ -47,10 +47,7 @@ def user_login(credentials):
         raise BadRequest("Invalid credentials")
     
     if isinstance(user, Student):
-        if not user.cohort_id:
-            raise BadRequest("Student not assigned to cohort")
-        cohort = Cohort.search(id=user.cohort_id)
-        if not cohort:
+        if not user.cohort_id or not Cohort.search(id=user.cohort_id):
             raise BadRequest("Student not assigned to cohort")
 
     access_token = create_access_token(identity={"id": user.id, "role": credentials.get("role")})
@@ -61,8 +58,12 @@ def user_login(credentials):
     del basic_details["id"]
     return {"access_token": access_token, "refresh_token": refresh_token, **basic_details}
 
-def verify_is_admin(id):
-    admin = Admin.search(id=id)
+def verify_is_admin():
+    identity = get_jwt_identity()
+    if not identity: raise UnAuthenticated()
+    
+    admin_id = identity["id"]
+    admin = Admin.search(id=admin_id)
     if admin is None:
         raise UnAuthenticated("Only Admins can register mentor accounts")
 
@@ -73,7 +74,7 @@ def create_user(data: dict, role: str) -> dict:
     """
     user = None
     if role == "mentor":
-        verify_is_admin(get_jwt_identity()["id"])
+        verify_is_admin()
         details = {
             "email": data.get('email'),
             "first_name": data.get('first_name'),
@@ -93,7 +94,7 @@ def create_user(data: dict, role: str) -> dict:
     user.save()
     user.refresh()
     fields = {"id", "first_name", "last_name",\
-              "email", "role"}
+              "email"}
     return retrieve_model_info(user, fields)
 
 

@@ -13,8 +13,11 @@ def create_app(environment="development"):
 
     if environment == "production":
         load_dotenv(".env.production")
+    elif environment == "testing":
+        load_dotenv(".env.testing")
     else:
         load_dotenv()
+
 
     app.config.update(
         SECRET_KEY=os.getenv("SECRET_KEY"),

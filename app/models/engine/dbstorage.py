@@ -2,7 +2,7 @@
 import os
 
 from flask import g
-from sqlalchemy import create_engine, or_, select
+from sqlalchemy import create_engine, or_, select, text
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from app.models.base import Base
@@ -21,8 +21,6 @@ from app.models.cohort import Cohort
 
 
 DB_CONNECTION_STRING = os.environ.get("DB_CONNECTION_STRING")
-TEST_DB_CONNECTION_STRING = os.environ.get("TEST_DB_CONNECTION_STRING")
-DEVELOPMENT = os.getenv("ENVIRONMENT", "production").lower() == 'development'  # True or False
 
 
 class DBStorage:
@@ -32,14 +30,24 @@ class DBStorage:
     __Session = None
 
     def __init__(self) -> None:
-        self.testing = True if os.getenv("TESTING") == "True" else False
-        self.__engine = create_engine(TEST_DB_CONNECTION_STRING if
-                                      self.testing else DB_CONNECTION_STRING,
+        self.testing = os.getenv("ENVIRONMENT") == "testing"
+        self.__engine = create_engine(DB_CONNECTION_STRING,
                                       pool_recycle=3600, pool_pre_ping=True,
                                       pool_size=20, max_overflow=40)
         Base.metadata.create_all(self.__engine)
         session = sessionmaker(bind=self.__engine)
         self.__Session = scoped_session(session)
+
+    def create_tables(self):
+        Base.metadata.create_all(self.__engine)
+
+    def clear_all_tables(self):
+        session = self.__Session()
+        session.execute(text('SET FOREIGN_KEY_CHECKS=0;'))
+        for table in reversed(Base.metadata.sorted_tables):  # Iterate tables in dependency order
+            session.execute(table.delete())
+        session.execute(text('SET FOREIGN_KEY_CHECKS=1;'))
+        session.commit()
 
     def drop_tables(self):
         """
@@ -48,8 +56,6 @@ class DBStorage:
             !!!!!!!!!
         """
         if self.testing:
-            if g.db_session.is_active:
-                g.db_session.close()
             Base.metadata.drop_all(self.__engine)
         else:
             raise Exception("SafeGuard: Do not try to drop tables randomly in production!!!!")

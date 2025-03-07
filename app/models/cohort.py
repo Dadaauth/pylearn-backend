@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import String, ForeignKey, Date
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy.dialects.mysql import ENUM
@@ -37,6 +39,8 @@ class Cohort(BaseModel, Base):
         if not accurate:
             raise ValueError(f"Missing required key(s): {', '.join(missing)}")
 
+        if type(self.start_date) == str:
+            self.start_date = date.fromisoformat(self.start_date)
         self.insert_cohort_at_correct_node(**kwargs)
 
     def insert_cohort_at_correct_node(self, **kwargs):

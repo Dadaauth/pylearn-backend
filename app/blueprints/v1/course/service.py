@@ -8,7 +8,7 @@ from app.utils.error_extensions import BadRequest, NotFound
 
 def icreate_course():
     data = extract_request_data("json")
-    if not data.get("title", "communication_channel"):
+    if not data.get("title") or not data.get("communication_channel"):
         raise BadRequest("Required field(s) (title or communication_channel) absent in request")
     if not data.get("status"): data["status"] = "published"
     Course(**data).save()

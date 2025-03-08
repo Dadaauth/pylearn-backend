@@ -59,6 +59,8 @@ def get_students_for_cohort(cohort_id):
     return students
 
 def iadd_students_to_cohort(cohort_id):
+    if not Cohort.search(id=cohort_id):
+        raise NotFound(f"Cohort with ID {cohort_id} not found!")
     student_ids = extract_request_data("form")[0].getlist("student_ids")
     for student_id in student_ids:
         student = Student.search(id=student_id)

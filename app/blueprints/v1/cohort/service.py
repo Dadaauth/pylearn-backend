@@ -60,7 +60,6 @@ def get_students_for_cohort(cohort_id):
 
 def iadd_students_to_cohort(cohort_id):
     student_ids = extract_request_data("form")[0].getlist("student_ids")
-    print(student_ids)
     for student_id in student_ids:
         student = Student.search(id=student_id)
         if student:

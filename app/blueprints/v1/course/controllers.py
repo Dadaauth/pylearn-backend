@@ -40,6 +40,7 @@ def retrieve_single_course_with_modules(course_id):
     course_with_modules = iretrieve_single_course_with_modules(course_id)
     return format_json_responses(data={"course": course_with_modules})
 
+@handle_endpoint_exceptions
 def retrieve_all_course_data(course_id):
     data = iretrieve_all_course_data(course_id)
     return format_json_responses(data={"course": data})

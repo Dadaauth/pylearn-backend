@@ -41,6 +41,6 @@ Make sure celery beat runs as a background process and is restarted automaticall
 
 ## RabbitMQ Setup
 
-* Install RabbitMQ on ubuntu using the script [install_rabbit_mq_ubuntu](/install_rabbit_mq_ubuntu.sh) provided in the root of the repo. For other platforms see [Downloading and Installing RabbitMQ](https://www.rabbitmq.com/download.html)
+* Install RabbitMQ on ubuntu 24.04 using the script [install_rabbit_mq_ubuntu](/install_rabbit_mq_ubuntu.sh) provided in the root of the repo. For other platforms see [Downloading and Installing RabbitMQ](https://www.rabbitmq.com/download.html)
 
 * Setup RabbitMQ for Celery using this guide [Celery RabbitMQ Guide](https://docs.celeryq.dev/en/main/getting-started/backends-and-brokers/rabbitmq.html)

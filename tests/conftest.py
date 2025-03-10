@@ -157,6 +157,24 @@ def admin(client, app):
         return Admin.search(id=data.get("data")["user"]["id"])
 
 @pytest.fixture
+def mentor(client, app):
+    with app.test_request_context():
+        app.preprocess_request()
+        from app.models.user import Mentor
+        dt = {
+            "email": "mentor1@email.com",
+            "first_name": "Test",
+            "last_name": "Last",
+            "password": "test_password",
+            "username": 'test_mentor1',
+            "role": "mentor",
+        }
+        mentor = Mentor(**dt)
+        mentor.save()
+        mentor.refresh()
+        return mentor
+
+@pytest.fixture
 def student(app):
     from app.models.course import Course
     from app.models.cohort import Cohort

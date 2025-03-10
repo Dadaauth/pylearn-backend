@@ -8,6 +8,9 @@ def iupdate_module(module_id):
     if not module:
         raise NotFound(f"Module with ID {module_id} not found")
 
+    if data.get("id"):
+        del data['id']
+
     module.update(**data)
     module.save()
 

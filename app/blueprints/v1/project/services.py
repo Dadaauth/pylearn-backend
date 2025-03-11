@@ -64,18 +64,16 @@ def iretrieve_projects_with_submissions(cohort_id):
 
 def iretrieve_assigned_project_submissions(project_id):
     mentor_id = get_jwt_identity()["id"]
-    project = AdminProject.search(id=project_id)
-    assigned_pjts = StudentProject.search(status="submitted", project_id=project_id, assigned_to=mentor_id)
+    project = CohortProject.search(id=project_id)
+    assigned_pjts = StudentProject.search(status="submitted", cohort_project_id=project_id, assigned_to=mentor_id)
 
     if not assigned_pjts:
-        raise NotFound("No submitted projects")
+        raise NotFound("No assigned projects")
 
     tmp = []
     if isinstance(assigned_pjts, StudentProject):
-        tmp.append(assigned_pjts)
-    elif isinstance(assigned_pjts, list):
-        for pjt in assigned_pjts:
-            tmp.append(pjt)
+        assigned_pjts = [assigned_pjts]
+    tmp.extend(assigned_pjts)
 
     assigned_projects = {
         "project": project.to_dict(),
@@ -84,7 +82,7 @@ def iretrieve_assigned_project_submissions(project_id):
     for t in tmp:
         student = Student.search(id=t.student_id)
         data = {
-            "student": student.to_dict(),
+            "student": student.basic_info(),
             "student_project": t.to_dict(),
         }
         assigned_projects.get("data").append(data)
@@ -92,7 +90,7 @@ def iretrieve_assigned_project_submissions(project_id):
 
 def igenerate_project_submission(project_id):
     mentor_id = get_jwt_identity()["id"]
-    submitted_projects = StudentProject.search(project_id=project_id, status="submitted", assigned_to=None)
+    submitted_projects = StudentProject.search(cohort_project_id=project_id, status="submitted", assigned_to=None)
     if not submitted_projects:
         raise NotFound("No Submitted Projects")
 

@@ -146,8 +146,10 @@ def update_single_project_details(project_id):
     project = AdminProject.search(id=project_id)
     if project is None or isinstance(project, list):
         raise BadRequest("Project not found or multiple projects found")
-    
-    status = "draft"
+
+    if data.get("id"):
+        del data['id']
+    status = project.status
     if data.get("mode") == "publish": status = "published"
     data["status"] = status
     data["author_id"] = get_jwt_identity()["id"]

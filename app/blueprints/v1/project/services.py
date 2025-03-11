@@ -43,21 +43,21 @@ def igrade_student_project():
 
 def iretrieve_projects_with_submissions(cohort_id):
     submissions = StudentProject.search(cohort_id=cohort_id, status="submitted")
+    if not submissions: return []
 
     projects_with_submissions = []
     projects_with_submissions_registry = []
 
-    if submissions:
-        if isinstance(submissions, StudentProject):
-            submissions = [submissions]
+    if isinstance(submissions, StudentProject):
+        submissions = [submissions]
 
-        for submission in submissions:
-            if submission.cohort_project_id in projects_with_submissions_registry:
-                continue
-            project = CohortProject.search(id=submission.cohort_project_id)
-            if not project: continue
-            projects_with_submissions_registry.append(project.id)
-            projects_with_submissions.append(project.to_dict())
+    for submission in submissions:
+        if submission.cohort_project_id in projects_with_submissions_registry:
+            continue
+        project = CohortProject.search(id=submission.cohort_project_id)
+        if not project: continue
+        projects_with_submissions_registry.append(project.id)
+        projects_with_submissions.append(project.to_dict())
 
     return projects_with_submissions
 

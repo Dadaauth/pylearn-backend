@@ -168,7 +168,8 @@ def send_welcome_email_for_student(student_details):
     support@authhub.tech
     """
     receipient_email = student_details["email"]
-    send_transactional_email.delay(subject, htmlBody, receipient_email)
+    if os.getenv("ENVIRONMENT") != "testing":
+        send_transactional_email.delay(subject, htmlBody, receipient_email)
 
 def student_create_new_account():
     data = extract_request_data("json")

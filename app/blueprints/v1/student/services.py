@@ -55,6 +55,10 @@ def append_projects_to_modules(modules, cohort_id):
     return modules
 
 def submit_project(project_id, data):
+    if not CohortProject.search(id=project_id):
+        raise BadRequest("Project not found!")
+    # TODO: Handle Situations where the user has
+    # submitted the project before
     student = Student.search(id=get_jwt_identity()['id'])
     data["cohort_id"] = student.cohort_id
     data["status"] = "submitted"

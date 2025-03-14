@@ -78,14 +78,13 @@ def get_extra_project_details(project):
 
 def get_project_data(project_id):
     if not project_id: return
+    student_id = get_jwt_identity()['id']
     cohortProject = CohortProject.search(id=project_id)
     if not cohortProject: raise NotFound("Project not found")
     cohort_project_dict = cohortProject.to_dict()
     
-    studentProject = StudentProject.search(cohort_project_id=cohortProject.id)
-    if not studentProject:
-        cohort_project_dict["status"] = "released"
-    else:
+    studentProject = StudentProject.search(student_id=student_id, cohort_project_id=cohortProject.id)
+    if studentProject:
         cohort_project_dict["status"] = studentProject.status
 
     module = Module.search(id=cohortProject.module_id)

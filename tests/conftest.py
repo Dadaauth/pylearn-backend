@@ -84,7 +84,7 @@ def create_project(app, admin, create_module):
     with app.test_request_context():
         app.preprocess_request()
         course, module = create_module
-        
+
         data = {
             "title": "Test Project",
             "module_id": module["id"],
@@ -208,3 +208,53 @@ def student(app):
         student_dict = student.to_dict()
         student.save()
         return Student.search(id=student_dict["id"])
+
+@pytest.fixture
+def students(app):
+    from app.models.course import Course
+    from app.models.cohort import Cohort
+    from app.models.user import Admin, Student
+    with app.test_request_context():
+        app.preprocess_request()
+        course = Course(title="Software Engineering",
+               status="published",
+               communication_channel="https://discord.com/invite"
+        )
+        course_id = course.id
+        course.save()
+        cohort = Cohort(name="Cohort-1",
+               status="pending",
+               course_id=course_id,
+               start_date=date.today() + timedelta(days=1),
+        )
+        cohort_id = cohort.id
+        cohort.save()
+        data1 = {
+            "email": "student@email.com",
+            "first_name": "Test",
+            "last_name": "Last",
+            "password": "test_password",
+            "username": 'test_student1',
+            "status": "active",
+            "course_id": course_id,
+            "cohort_id": cohort_id,
+        }
+        data2 = {
+            "email": "student1@email.com",
+            "first_name": "Test",
+            "last_name": "Last",
+            "password": "test_password",
+            "username": 'test_student2',
+            "status": "active",
+            "course_id": course_id,
+            "cohort_id": cohort_id,
+        }
+        student1 = Student(**data1)
+        student2 = Student(**data2)
+        student1_dict = student1.to_dict()
+        student2_dict = student2.to_dict()
+        student1.save()
+        student2.save()
+        student1.refresh()
+        student2.refresh()
+        return student1, student2

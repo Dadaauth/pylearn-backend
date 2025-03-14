@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 
 from flask_jwt_extended import get_jwt_identity
@@ -188,11 +189,13 @@ def student_create_new_account():
         "status": "inactive",
     }
 
-    last_cohort = Cohort.search(course_id=student_details["course_id"], next_cohort_id=None)
-    if not last_cohort:
-        raise InternalServerError("No Cohorts assignable to student found")
+    if not data.get('cohort_id'):
+        last_cohort = Cohort.search(course_id=student_details["course_id"], next_cohort_id=None)
+        if not last_cohort:
+            raise InternalServerError("No Cohorts assignable to student found")
     
-    student_details["cohort_id"] = last_cohort.id
+        student_details["cohort_id"] = last_cohort.id
 
     Student(**student_details).save()
+    del student_details['password']
     return student_details

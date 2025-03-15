@@ -7,6 +7,8 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from sqlalchemy.exc import InterfaceError
 
+load_dotenv()
+
 def create_app(environment="development"):
     app = Flask(__name__)
     CORS(app)

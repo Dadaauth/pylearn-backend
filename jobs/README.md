@@ -10,6 +10,12 @@ All Celery related command must be run in the root directory
 celery multi start 6 -A jobs -l INFO -Q:1-3 daily_run -Q:4,5 mailing_service -Q:6 celery --pidfile="$HOME/celery/%n.pid" --logfile="$HOME/celery/%n.log"
 ```
 
+For systemd service file, you need to escape '%' with '%'
+
+```shell
+celery multi start 6 -A jobs -l INFO -Q:1-3 daily_run -Q:4,5 mailing_service -Q:6 celery --pidfile="$HOME/celery/%%n.pid" --logfile="$HOME/celery/%%n.log"
+```
+
 Note that this comand must be run in the root directory.
 
 * [routing](https://docs.celeryq.dev/en/main/getting-started/next-steps.html#routing)
@@ -20,7 +26,13 @@ Note that this comand must be run in the root directory.
 The stop command is asynchronous so it won’t wait for the worker to shutdown. You’ll probably want to use the stopwait command instead, which ensures that all currently executing tasks are completed before exiting:
 
 ```shell
-celery multi stopwait 5 -A jobs -l INFO --pidfile="$HOME/celery/%n.pid" --logfile="$HOME/celery/%n.log"
+celery multi stopwait 6 -A jobs -l INFO --pidfile="$HOME/celery/%n.pid" --logfile="$HOME/celery/%n.log"
+```
+
+For systemd service file, you need to escape '%' with '%'
+
+```shell
+celery multi stopwait 6 -A jobs -l INFO --pidfile="$HOME/celery/%%n.pid" --logfile="$HOME/celery/%%n.log"
 ```
 
 ## Remote Control
